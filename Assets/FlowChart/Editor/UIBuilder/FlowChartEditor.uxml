@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <JuicyFlowChart.SplitView fixed-pane-initial-dimension="220">
+        <ui:VisualElement name="left-panel">
+            <ui:Label text="Inspector" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />
+            <ui:Button text="SAVE" name="save" style="min-height: 30px; -unity-font-style: bold; color: rgb(255, 255, 255); font-size: 15px;" />
+            <JuicyFlowChart.InspectorView style="height: 72px; flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel">
+            <ui:Label text="FlowChart" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />
+            <JuicyFlowChart.FlowChartView focusable="true" style="flex-grow: 1;">
+                <ui:Label display-tooltip-when-elided="true" name="flowChartName" style="font-size: 20px; -unity-font-style: bold; color: rgba(255, 225, 0, 0.53);" />
+            </JuicyFlowChart.FlowChartView>
+        </ui:VisualElement>
+    </JuicyFlowChart.SplitView>
+</ui:UXML>

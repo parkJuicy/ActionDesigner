@@ -1,0 +1,108 @@
+#node-border {
+    background-color: rgb(79, 79, 79);
+    border-left-color: rgb(40, 40, 40);
+    border-right-color: rgb(40, 40, 40);
+    border-top-color: rgb(40, 40, 40);
+    border-bottom-color: rgb(40, 40, 40);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+#input {
+    align-items: center;
+    width: auto;
+    height: auto;
+}
+
+#output {
+    align-items: center;
+}
+
+#selection-border {
+    border-left-color: rgb(0, 188, 255);
+    border-right-color: rgb(0, 188, 255);
+    border-top-color: rgb(0, 188, 255);
+    border-bottom-color: rgb(0, 188, 255);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#title {
+    -unity-font-style: bold;
+    font-size: 14px;
+}
+
+#divider {
+    min-height: 1px;
+    background-color: rgb(48, 48, 48);
+}
+
+.action #input {
+    background-color: rgb(254, 95, 85);
+}
+
+.condition #input {
+    background-color: rgb(83, 134, 228);
+}
+
+.root #input {
+    background-color: rgb(255, 255, 255);
+    min-height: 20px;
+}
+
+.enable #node-state {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgb(0, 255, 102);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+}
+
+.disable #node-state {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-color: rgb(0, 0, 0);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+}
+
+.node {
+    min-width: 150px;
+}
+
+.node:hover {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgba(0, 221, 255, 255);
+    border-right-color: rgba(0, 221, 255, 255);
+    border-top-color: rgba(0, 221, 255, 255);
+    border-bottom-color: rgba(0, 221, 255, 255);
+}
+
+.node:checked {
+    border-left-color: rgba(0, 118, 255, 255);
+    border-right-color: rgba(0, 118, 255, 255);
+    border-top-color: rgba(0, 118, 255, 255);
+    border-bottom-color: rgba(0, 118, 255, 255);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+}

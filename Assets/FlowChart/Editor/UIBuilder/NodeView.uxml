@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="NodeViewStyle.uss" />
+    <ui:VisualElement name="node-state">
+        <ui:VisualElement name="node-border" style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; min-width: 50px;">
+            <ui:VisualElement name="contents" style="min-height: auto; min-width: 20px; max-width: none;">
+                <ui:VisualElement name="divider" class="horizontal" />
+                <ui:VisualElement name="top">
+                    <ui:VisualElement name="input" style="max-height: none;" />
+                    <ui:VisualElement name="divider" class="vertical" />
+                    <ui:VisualElement name="title">
+                        <ui:Label name="title-label" text="RepeatNode" class="unity-text-element unity-label" style="-unity-text-align: middle-center; min-height: 40px;" />
+                        <ui:VisualElement name="title-button-container">
+                            <ui:VisualElement name="collapse-button">
+                                <ui:VisualElement name="icon" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="divider" class="horizontal" />
+                    <ui:VisualElement name="output" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="selection-border" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>
