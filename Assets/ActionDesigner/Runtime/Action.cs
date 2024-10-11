@@ -10,13 +10,8 @@ namespace ActionDesigner.Runtime
     [Serializable]
     public class Action
     {
-        [HideInInspector, SerializeField]
-        int _rootID;
-        [HideInInspector, SerializeField]
-        List<Node> _nodes = new List<Node>();
-
-        public int rootID { get => _rootID; internal set => _rootID = value; }
-        public List<Node> nodes { get => _nodes; internal set => _nodes = value; }
+        public int rootID;
+        public List<Node> nodes = new List<Node>();
 
         static Dictionary<string, Type> _operationTypes = new Dictionary<string, Type>();
 
@@ -50,38 +45,23 @@ namespace ActionDesigner.Runtime
             node.nameSpace = namespaceType;
             node.id = GUID.Generate().GetHashCode();
             node.position = position;
-
+            
             var instance = Activator.CreateInstance(GetOperationType(namespaceType, type));
-            node.operation = instance as Operation;
-
-            _nodes.Add(node);
+            node.task = instance as Task;
+            node.baseType = baseType;
+            
+            nodes.Add(node);
             return node;
         }
-
-        public Node CreateRootNode(Node childNode)
-        {
-            Node root = new Node();
-            root.type = "Root";
-            root.nameSpace = "ActionDesigner.Runtime";
-            root.id = GUID.Generate().GetHashCode();
-            root.position = childNode.position + new Vector2(0, -150f);
-            AddChild(root, childNode);
-
-            var instance = Activator.CreateInstance(GetOperationType("ActionDesigner.Runtime", "Root"));
-
-            _rootID = root.id;
-            _nodes.Add(root);
-            return root;
-        }
-
+        
         public void DeleteNode(Node node)
         {
-            if (node.id == _rootID)
+            if (node.id == rootID)
             {
-                _rootID = 0;
+                rootID = 0;
             }
 
-            _nodes.Remove(node);
+            nodes.Remove(node);
         }
 
         public void AddChild(Node parent, Node child)

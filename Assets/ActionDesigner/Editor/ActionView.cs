@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Motion = ActionDesigner.Runtime.Motion;
 
 namespace ActionDesigner.Editor
 {
@@ -78,11 +79,14 @@ namespace ActionDesigner.Editor
 
         void CreateNodeView(Runtime.Node node)
         {
-            NodeView nodeView = new NodeView(node, node.id == _action.rootID);
-            nodeView.OnNodeSelected = OnNodeSelected;
+            NodeView nodeView = new NodeView(node, node.id == _action.rootID)
+            {
+                OnNodeSelected = OnNodeSelected,
+                OnNodeRootSet = OnNodeRootSet
+            };
             AddElement(nodeView);
         }
-
+        
         GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
             if (_action == null || Application.isPlaying)
@@ -154,10 +158,11 @@ namespace ActionDesigner.Editor
                 return;
 
             evt.menu.AppendSeparator();
-            ShowNodeTypes<Operation>(evt);
+            ShowNodeTypes<Motion>(evt);
+            ShowNodeTypes<Transition>(evt);
         }
 
-        void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt) where T : Operation
+        void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt) where T : Task
         {
             VisualElement contentViewContainer = ElementAt(1);
             Vector3 screenMousePosition = evt.localMousePosition;
@@ -176,15 +181,10 @@ namespace ActionDesigner.Editor
                 evt.menu.AppendAction(menu, (actionEvent) =>
                 {
                     Runtime.Node node = _action.CreateNode(type.Name, type.Namespace, type.BaseType.Name, worldMousePosition);
-                    CreateNodeView(node);
-
                     if (_action.rootID == 0)
-                    {
-                        Runtime.Node root = _action.CreateRootNode(node);
-                        CreateNodeView(root);
-                        DrawEdge();
-                    }
+                        _action.rootID = node.id;
 
+                    CreateNodeView(node);
                     EditorUtility.SetDirty(_actionRunner);
                 });
             }
@@ -201,6 +201,25 @@ namespace ActionDesigner.Editor
             return ports.ToList().Where(endPort =>
             endPort.direction != startPort.direction &&
             endPort.node != startPort.node).ToList();
+        }
+        
+        void OnNodeRootSet(int newRootNodeID)
+        {
+            _action.rootID = newRootNodeID;
+            _action.nodes.ForEach(node => DisconnectRootParentEdge(node, newRootNodeID));
+            
+            graphViewChanged -= OnGraphViewChanged;
+            DeleteElements(graphElements.ToList());
+            graphViewChanged += OnGraphViewChanged;
+            
+            DrawNode();
+            DrawEdge();
+        }
+
+        void DisconnectRootParentEdge(Runtime.Node node, int newRootNodeID)
+        {
+            if (node.childrenID.Contains(newRootNodeID))
+                node.childrenID.Remove(newRootNodeID);
         }
     }
 }

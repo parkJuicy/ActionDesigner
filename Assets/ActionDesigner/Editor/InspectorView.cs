@@ -47,7 +47,7 @@ namespace ActionDesigner.Editor
         private void DrawInspectorView()
         {
             EditorGUILayout.LabelField(_type.Name, EditorStyles.boldLabel);
-            _drawer.Draw(_node.operation, _fields, SaveField);
+            _drawer.Draw(_node.task, _fields, SaveField);
         }
 
         private void SaveField()

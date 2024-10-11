@@ -1,6 +1,4 @@
-using JuicyFlowChart;
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,9 +15,10 @@ namespace ActionDesigner.Editor
         public Runtime.Node Node { get => _node; }
         public Port Input { get => input; }
         public Port Output { get => output; }
-        public System.Action<NodeView> OnNodeSelected { get; internal set; }
+        public Action<NodeView> OnNodeSelected { get; internal set; }
+        public Action<int> OnNodeRootSet { get; internal set; }
 
-        public NodeView(Runtime.Node node, bool isRoot) : base(FlowChartEditorPath.nodeViewUxml)
+        public NodeView(Runtime.Node node, bool isRoot) : base(UIToolkitPath.nodeViewUxml)
         {
             _node = node;
             _isRoot = isRoot;
@@ -46,7 +45,11 @@ namespace ActionDesigner.Editor
 
         private void CreateInputPorts()
         {
-            input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(bool));
+            if (_node.baseType == "Motion")
+                input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi, typeof(bool));
+            else
+                input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(bool));
+            
             input.portName = "";
             input.style.flexDirection = FlexDirection.Row;
             input.style.paddingLeft = 12;
@@ -68,11 +71,11 @@ namespace ActionDesigner.Editor
             {
                 AddToClassList("root");
             }
-            //else if (_node.baseType == "Action")
+            //else if (_node.baseType == "Motion")
             //{
             //    AddToClassList("action");
             //}
-            //else if (_node.baseType == "Condition")
+            //else if (_node.baseType == "Transition")
             //{
             //    AddToClassList("condition");
             //}
@@ -113,6 +116,14 @@ namespace ActionDesigner.Editor
             //            break;
             //    }
             //}
+        }
+
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            evt.menu.AppendAction("Set Root Node", (actionEvent) =>
+            {
+                OnNodeRootSet.Invoke(_node.id);
+            });
         }
     }
 }

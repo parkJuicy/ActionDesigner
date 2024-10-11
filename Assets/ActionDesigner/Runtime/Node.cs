@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ActionDesigner.Runtime
 {
@@ -18,6 +19,8 @@ namespace ActionDesigner.Runtime
         [HideInInspector]
         public List<int> childrenID = new List<int>();
         [SerializeReference]
-        public Operation operation;
+        public Task task;
+        [HideInInspector]
+        public string baseType;
     }
 }

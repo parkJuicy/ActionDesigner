@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ActionDesigner.Runtime
 {
-    public class Operation
+    public abstract class Task
     {
 
     }
