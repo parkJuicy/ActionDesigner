@@ -87,6 +87,29 @@ namespace ActionDesigner.Editor
             AddElement(nodeView);
         }
         
+        private bool ValidateConnection(Runtime.Node parent, Runtime.Node child)
+        {
+            // Motion은 Transition과만 연결 가능
+            if (parent.task is Motion && !(child.task is Transition))
+            {
+                return false;
+            }
+            
+            // Transition은 Motion과만 연결 가능
+            if (parent.task is Transition && !(child.task is Motion))
+            {
+                return false;
+            }
+            
+            // Transition은 하나의 자식만 가질 수 있음
+            if (parent.task is Transition && parent.childrenID.Count >= 1)
+            {
+                return false;
+            }
+            
+            return true;
+        }
+        
         GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
             if (_action == null || Application.isPlaying)
@@ -113,15 +136,49 @@ namespace ActionDesigner.Editor
                 });
             }
 
-            // Create Edge
+            // Create Edge with validation
             if (graphViewChange.edgesToCreate != null)
             {
+                var validEdges = new List<Edge>();
+                
                 graphViewChange.edgesToCreate.ForEach(edge =>
                 {
                     NodeView parentView = edge.output.node as NodeView;
                     NodeView childView = edge.input.node as NodeView;
-                    _action.AddChild(parentView.Node, childView.Node);
+                    
+                    // 연결 규칙 검증
+                    if (ValidateConnection(parentView.Node, childView.Node))
+                    {
+                        _action.AddChild(parentView.Node, childView.Node);
+                        validEdges.Add(edge);
+                    }
+                    else
+                    {
+                        // 잘못된 연결인 경우 경고 메시지
+                        string parentType = parentView.Node.task.GetType().Name;
+                        string childType = childView.Node.task.GetType().Name;
+                        
+                        if (parentView.Node.task is Motion && !(childView.Node.task is Transition))
+                        {
+                            Debug.LogWarning($"Motion은 Transition과만 연결할 수 있습니다: {parentType} -> {childType}");
+                        }
+                        else if (parentView.Node.task is Transition && !(childView.Node.task is Motion))
+                        {
+                            Debug.LogWarning($"Transition은 Motion과만 연결할 수 있습니다: {parentType} -> {childType}");
+                        }
+                        else if (parentView.Node.task is Transition && parentView.Node.childrenID.Count >= 1)
+                        {
+                            Debug.LogWarning($"Transition은 하나의 자식만 가질 수 있습니다: {parentType}");
+                        }
+                        
+                        // 잘못된 연결 제거
+                        edge.output.Disconnect(edge);
+                        edge.input.Disconnect(edge);
+                        RemoveElement(edge);
+                    }
                 });
+                
+                graphViewChange.edgesToCreate = validEdges;
             }
 
             if (graphViewChange.movedElements != null)
@@ -181,7 +238,9 @@ namespace ActionDesigner.Editor
                 evt.menu.AppendAction(menu, (actionEvent) =>
                 {
                     Runtime.Node node = _action.CreateNode(type.Name, type.Namespace, type.BaseType.Name, worldMousePosition);
-                    if (_action.rootID == 0)
+                    
+                    // 루트 노드는 Motion만 가능
+                    if (_action.rootID == 0 && typeof(T) == typeof(Motion))
                         _action.rootID = node.id;
 
                     CreateNodeView(node);
@@ -194,13 +253,45 @@ namespace ActionDesigner.Editor
         {
             if (Application.isPlaying)
             {
-                List<Port> emptyPort = new List<Port>();
-                return emptyPort;
+                return new List<Port>();
             }
 
-            return ports.ToList().Where(endPort =>
-            endPort.direction != startPort.direction &&
-            endPort.node != startPort.node).ToList();
+            var compatiblePorts = new List<Port>();
+            var startNodeView = startPort.node as NodeView;
+            
+            if (startNodeView == null)
+                return compatiblePorts;
+
+            foreach (var port in ports.ToList())
+            {
+                var endNodeView = port.node as NodeView;
+                
+                // 기본 조건: 반대 방향이고 다른 노드여야 함
+                if (port.direction == startPort.direction || port.node == startPort.node)
+                    continue;
+                
+                if (endNodeView == null)
+                    continue;
+                
+                // Output 포트에서 시작하는 경우 (상위 -> 하위 연결)
+                if (startPort.direction == Direction.Output)
+                {
+                    if (ValidateConnection(startNodeView.Node, endNodeView.Node))
+                    {
+                        compatiblePorts.Add(port);
+                    }
+                }
+                // Input 포트에서 시작하는 경우 (하위 -> 상위 연결)
+                else
+                {
+                    if (ValidateConnection(endNodeView.Node, startNodeView.Node))
+                    {
+                        compatiblePorts.Add(port);
+                    }
+                }
+            }
+            
+            return compatiblePorts;
         }
         
         void OnNodeRootSet(int newRootNodeID)

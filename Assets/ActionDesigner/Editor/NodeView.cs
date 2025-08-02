@@ -58,7 +58,12 @@ namespace ActionDesigner.Editor
 
         private void CreateOutputPorts()
         {
-            output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Multi, typeof(bool));
+            // Motion은 여러 개의 자식을 가질 수 있고, Transition은 하나만 가질 수 있음
+            if (_node.baseType == "Motion")
+                output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Multi, typeof(bool));
+            else // Transition
+                output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Single, typeof(bool));
+                
             output.portName = "";
             output.style.flexDirection = FlexDirection.RowReverse;
             output.style.paddingRight = 12;
@@ -71,14 +76,14 @@ namespace ActionDesigner.Editor
             {
                 AddToClassList("root");
             }
-            //else if (_node.baseType == "Motion")
-            //{
-            //    AddToClassList("action");
-            //}
-            //else if (_node.baseType == "Transition")
-            //{
-            //    AddToClassList("condition");
-            //}
+            else if (_node.baseType == "Motion")
+            {
+                AddToClassList("motion");
+            }
+            else if (_node.baseType == "Transition")
+            {
+                AddToClassList("transition");
+            }
         }
 
         public override void SetPosition(Rect newPos)
@@ -120,10 +125,27 @@ namespace ActionDesigner.Editor
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
-            evt.menu.AppendAction("Set Root Node", (actionEvent) =>
+            // Motion만 루트 노드로 설정 가능
+            if (_node.baseType == "Motion")
             {
-                OnNodeRootSet.Invoke(_node.id);
-            });
+                evt.menu.AppendAction("Set Root Node", (actionEvent) =>
+                {
+                    OnNodeRootSet.Invoke(_node.id);
+                });
+            }
+            else
+            {
+                evt.menu.AppendAction("Set Root Node", (actionEvent) =>
+                {
+                    // 아무것도 하지 않음
+                }, DropdownMenuAction.Status.Disabled);
+                
+                evt.menu.AppendSeparator();
+                evt.menu.AppendAction("(루트 노드는 Motion만 가능)", (actionEvent) =>
+                {
+                    // 정보 메시지
+                }, DropdownMenuAction.Status.Disabled);
+            }
         }
     }
 }

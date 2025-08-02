@@ -17,6 +17,16 @@ namespace ActionDesigner.Editor
     public class FieldDrawer
     {
         private Action _onChangeValue;
+        private static Dictionary<Type, List<Type>> _typeCache = new Dictionary<Type, List<Type>>();
+        private static bool _typeCacheInitialized = false;
+        
+        // 캐시 클리어 메서드 (에디터 메뉴에서 사용 가능)
+        [UnityEditor.MenuItem("Action Designer/Clear Type Cache")]
+        public static void ClearTypeCache()
+        {
+            _typeCache.Clear();
+            _typeCacheInitialized = false;
+        }
 
         public void Draw(object obj, List<FieldInfo> fieldInfos, Action onChangeValue)
         {
@@ -143,9 +153,15 @@ namespace ActionDesigner.Editor
         
         private List<Type> GetSerializeReferenceTypes(Type baseType)
         {
+            // 캐시에서 먼저 확인
+            if (_typeCache.TryGetValue(baseType, out List<Type> cachedTypes))
+            {
+                return cachedTypes;
+            }
+            
+            // 캐시가 없으면 즉시 검색
             var types = new List<Type>();
             
-            // 현재 도메인의 모든 어셈블리에서 해당 타입을 상속하는 클래스들 찾기
             foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
@@ -180,12 +196,105 @@ namespace ActionDesigner.Editor
                 }
                 catch (System.Exception)
                 {
-                    // 일부 어셈블리에서 타입 로드 실패는 무시
                     continue;
                 }
             }
             
-            return types.OrderBy(t => t.Name).ToList();
+            var result = types.OrderBy(t => t.Name).ToList();
+            _typeCache[baseType] = result;
+            return result;
+        }
+        
+        private static void InitializeTypeCache()
+        {
+            if (_typeCacheInitialized)
+                return;
+                
+            _typeCache.Clear();
+            
+            try
+            {
+                // 모든 어셈블리에서 한 번에 모든 타입을 스캔
+                var allTypes = new List<Type>();
+                foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    try
+                    {
+                        // 매우 큰 어셈블리는 건너뜨기 (성능 최적화)
+                        if (assembly.IsDynamic || assembly.GetName().Name.StartsWith("System") || 
+                            assembly.GetName().Name.StartsWith("Unity") || assembly.GetName().Name.StartsWith("Microsoft"))
+                            continue;
+                            
+                        allTypes.AddRange(assembly.GetTypes());
+                    }
+                    catch (System.Exception)
+                    {
+                        // 일부 어셈블리에서 타입 로드 실패는 무시
+                        continue;
+                    }
+                }
+                
+                // 각 인터페이스/베이스 클래스에 대해 구현체들을 찾아 캐시에 저장
+                var baseTypes = allTypes.Where(t => 
+                    (t.IsInterface || (t.IsClass && !t.IsSealed)) && 
+                    t.IsSerializable &&
+                    !t.IsGenericType
+                ).Take(100).ToList(); // 최대 100개만 처리
+                
+                foreach (var baseType in baseTypes)
+                {
+                    var implementingTypes = new List<Type>();
+                    
+                    foreach (var type in allTypes)
+                    {
+                        if (type.IsGenericType || !type.IsSerializable)
+                            continue;
+                            
+                        bool isValid = false;
+                        
+                        try
+                        {
+                            if (baseType.IsInterface)
+                            {
+                                // 인터페이스인 경우
+                                isValid = type != baseType && 
+                                         type.GetInterfaces().Contains(baseType) &&
+                                         !type.IsAbstract && 
+                                         !type.IsInterface &&
+                                         type.IsSerializable;
+                            }
+                            else if (baseType.IsClass)
+                            {
+                                // 클래스인 경우
+                                isValid = type != baseType && 
+                                         baseType.IsAssignableFrom(type) &&
+                                         !type.IsAbstract && 
+                                         type.IsSerializable;
+                            }
+                        }
+                        catch
+                        {
+                            // 타입 체크 중 에러 발생 시 건너뜨기
+                            continue;
+                        }
+                        
+                        if (isValid)
+                        {
+                            implementingTypes.Add(type);
+                        }
+                    }
+                    
+                    _typeCache[baseType] = implementingTypes.OrderBy(t => t.Name).ToList();
+                }
+            }
+            catch (System.Exception)
+            {
+                // 전체 초기화 실패 시 빈 캐시로 남겨두기
+            }
+            finally
+            {
+                _typeCacheInitialized = true;
+            }
         }
         
         private void DrawObjectFields(object obj)

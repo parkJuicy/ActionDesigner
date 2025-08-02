@@ -50,11 +50,11 @@
     background-color: rgb(48, 48, 48);
 }
 
-.action #input {
+.motion #input {
     background-color: rgb(254, 95, 85);
 }
 
-.condition #input {
+.transition #input {
     background-color: rgb(83, 134, 228);
 }
 

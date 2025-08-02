@@ -17,12 +17,19 @@ namespace ActionDesigner.Editor
         List<FieldInfo> _fields = new List<FieldInfo>();
         FieldDrawer _drawer = new FieldDrawer();
         ActionRunner _actionRunner;
+        private IMGUIContainer _container;
+        private bool _needsRedraw = true;
 
         internal void ShowInspector(NodeView nodeView, ActionRunner actionRunner)
         {
+            // 같은 노드라면 다시 그리지 않음
+            if (_node == nodeView.Node && _actionRunner == actionRunner && !_needsRedraw)
+                return;
+                
             Clear();
             _node = nodeView.Node;
             _actionRunner = actionRunner;
+            _needsRedraw = false;
 
             _type = Runtime.Action.GetOperationType(_node.nameSpace, _node.type);
             if (_type == null)
@@ -40,8 +47,8 @@ namespace ActionDesigner.Editor
                     _fields.Add(field);
             }
 
-            IMGUIContainer container = new IMGUIContainer(DrawInspectorView);
-            Add(container);
+            _container = new IMGUIContainer(DrawInspectorView);
+            Add(_container);
         }
 
         private void DrawInspectorView()
@@ -53,7 +60,11 @@ namespace ActionDesigner.Editor
         private void SaveField()
         {
             if (_actionRunner != null)
+            {
                 EditorUtility.SetDirty(_actionRunner);
+                // 필드 값 변경 시에는 다시 그리지 않음 - 이미 그려진 상태에서 값만 변경
+                // _needsRedraw = true; // 이 줄을 주석 처리
+            }
         }
     }
 }
