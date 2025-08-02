@@ -10,7 +10,7 @@ namespace ActionDesigner.Editor
 {
     public class InspectorView : VisualElement
     {
-        public new class UxmlFactory : UxmlFactory<InspectorView, VisualElement.UxmlTraits> { }
+        [Obsolete("Obsolete")] public new class UxmlFactory : UxmlFactory<InspectorView, UxmlTraits> { }
 
         Node _node;
         Type _type;

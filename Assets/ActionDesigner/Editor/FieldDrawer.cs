@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -31,17 +32,195 @@ namespace ActionDesigner.Editor
         protected virtual void DrawField(FieldInfo field, object obj)
         {
             var value = field.GetValue(obj);
-            var returnValue = DrawValue(field.Name, field.FieldType, value);
+            
+            // SerializeReference 속성 체크 (안전한 방법)
+#if UNITY_2019_3_OR_NEWER
+            bool hasSerializeReference = false;
+            var attributes = field.GetCustomAttributes(false);
+            foreach (var attr in attributes)
+            {
+                if (attr.GetType().Name == "SerializeReferenceAttribute")
+                {
+                    hasSerializeReference = true;
+                    break;
+                }
+            }
+#else
+            bool hasSerializeReference = false; // Unity 2019.3 이전에서는 지원하지 않음
+#endif
+            
+            object returnValue;
+            if (hasSerializeReference)
+            {
+                returnValue = DrawSerializeReference(field.Name, field.FieldType, value, field);
+            }
+            else
+            {
+                returnValue = DrawValue(field.Name, field.FieldType, value);
+            }
 
-            if (returnValue == null)
+            if (returnValue == null && value != null)
             {
                 field.SetValue(obj, null);
                 _onChangeValue?.Invoke();
             }
-            else if (!returnValue.Equals(value))
+            else if (returnValue != null && !returnValue.Equals(value))
             {
                 field.SetValue(obj, returnValue);
                 _onChangeValue?.Invoke();
+            }
+            else if (returnValue != value) // null과 null이 아닌 경우 비교
+            {
+                field.SetValue(obj, returnValue);
+                _onChangeValue?.Invoke();
+            }
+        }
+        
+        protected virtual object DrawSerializeReference(string fieldName, Type fieldType, object value, FieldInfo fieldInfo)
+        {
+#if UNITY_2019_3_OR_NEWER
+            EditorGUILayout.BeginVertical("box");
+            
+            // 현재 타입 표시
+            string currentTypeName = value?.GetType().Name ?? "None";
+            EditorGUILayout.LabelField($"{fieldName} ({currentTypeName})", EditorStyles.boldLabel);
+            
+            // 타입 선택 드롭다운
+            var availableTypes = GetSerializeReferenceTypes(fieldType);
+            
+            var typeNames = new string[availableTypes.Count + 1];
+            typeNames[0] = "None";
+            
+            int currentIndex = 0;
+            for (int i = 0; i < availableTypes.Count; i++)
+            {
+                typeNames[i + 1] = availableTypes[i].Name;
+                if (value != null && availableTypes[i] == value.GetType())
+                {
+                    currentIndex = i + 1;
+                }
+            }
+            
+            int newIndex = EditorGUILayout.Popup("Type", currentIndex, typeNames);
+            
+            // 타입이 변경되었을 때
+            if (newIndex != currentIndex)
+            {
+                if (newIndex == 0)
+                {
+                    value = null;
+                }
+                else
+                {
+                    var newType = availableTypes[newIndex - 1];
+                    try
+                    {
+                        value = Activator.CreateInstance(newType);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"Failed to create instance of {newType.Name}: {e.Message}");
+                        value = null;
+                    }
+                }
+            }
+            
+            // 현재 객체의 필드들 그리기
+            if (value != null)
+            {
+                EditorGUI.indentLevel++;
+                DrawObjectFields(value);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.EndVertical();
+            return value;
+#else
+            // Unity 2019.3 이전 버전에서는 기본 방식으로 그리기
+            return DrawValue(fieldName, fieldType, value);
+#endif
+        }
+        
+        private List<Type> GetSerializeReferenceTypes(Type baseType)
+        {
+            var types = new List<Type>();
+            
+            // 현재 도메인의 모든 어셈블리에서 해당 타입을 상속하는 클래스들 찾기
+            foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        bool isValid = false;
+                        
+                        if (baseType.IsInterface)
+                        {
+                            // 인터페이스인 경우
+                            isValid = type != baseType && 
+                                     type.GetInterfaces().Contains(baseType) &&
+                                     !type.IsAbstract && 
+                                     !type.IsInterface &&
+                                     type.IsSerializable;
+                        }
+                        else
+                        {
+                            // 클래스인 경우
+                            isValid = type != baseType && 
+                                     baseType.IsAssignableFrom(type) &&
+                                     !type.IsAbstract && 
+                                     type.IsSerializable;
+                        }
+                        
+                        if (isValid)
+                        {
+                            types.Add(type);
+                        }
+                    }
+                }
+                catch (System.Exception)
+                {
+                    // 일부 어셈블리에서 타입 로드 실패는 무시
+                    continue;
+                }
+            }
+            
+            return types.OrderBy(t => t.Name).ToList();
+        }
+        
+        private void DrawObjectFields(object obj)
+        {
+            if (obj == null) return;
+            
+            var type = obj.GetType();
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            foreach (var field in fields)
+            {
+                bool isPublic = field.IsPublic;
+                bool isSerializeField = Attribute.IsDefined(field, typeof(SerializeField));
+                
+                if (isPublic || isSerializeField)
+                {
+                    var value = field.GetValue(obj);
+                    var newValue = DrawValue(field.Name, field.FieldType, value);
+                    
+                    if (newValue == null && value != null)
+                    {
+                        field.SetValue(obj, null);
+                        _onChangeValue?.Invoke();
+                    }
+                    else if (newValue != null && !newValue.Equals(value))
+                    {
+                        field.SetValue(obj, newValue);
+                        _onChangeValue?.Invoke();
+                    }
+                    else if (newValue != value)
+                    {
+                        field.SetValue(obj, newValue);
+                        _onChangeValue?.Invoke();
+                    }
+                }
             }
         }
 
@@ -111,7 +290,7 @@ namespace ActionDesigner.Editor
             {
                 value = DrawGradient(fieldName, (Gradient)value);
             }
-            else if (type.IsClass)
+            else if (type.IsClass || type.IsInterface)
             {
                 value = DrawObject(fieldName, value, type);
             }
@@ -120,6 +299,70 @@ namespace ActionDesigner.Editor
                 EditorGUILayout.LabelField(fieldName, "invalid Type: " + type.Name);
             }
             return value;
+        }
+        
+        private object DrawSerializeReferenceDirectly(string fieldName, Type fieldType, object value)
+        {
+#if UNITY_2019_3_OR_NEWER
+            EditorGUILayout.BeginVertical("box");
+            
+            // 현재 타입 표시
+            string currentTypeName = value?.GetType().Name ?? "None";
+            EditorGUILayout.LabelField($"{fieldName} ({currentTypeName})", EditorStyles.boldLabel);
+            
+            // 타입 선택 드롭다운
+            var availableTypes = GetSerializeReferenceTypes(fieldType);
+            
+            var typeNames = new string[availableTypes.Count + 1];
+            typeNames[0] = "None";
+            
+            int currentIndex = 0;
+            for (int i = 0; i < availableTypes.Count; i++)
+            {
+                typeNames[i + 1] = availableTypes[i].Name;
+                if (value != null && availableTypes[i] == value.GetType())
+                {
+                    currentIndex = i + 1;
+                }
+            }
+            
+            int newIndex = EditorGUILayout.Popup("Type", currentIndex, typeNames);
+            
+            // 타입이 변경되었을 때
+            if (newIndex != currentIndex)
+            {
+                if (newIndex == 0)
+                {
+                    value = null;
+                }
+                else
+                {
+                    var newType = availableTypes[newIndex - 1];
+                    try
+                    {
+                        value = Activator.CreateInstance(newType);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"Failed to create instance of {newType.Name}: {e.Message}");
+                        value = null;
+                    }
+                }
+            }
+            
+            // 현재 객체의 필드들 그리기
+            if (value != null)
+            {
+                EditorGUI.indentLevel++;
+                DrawObjectFields(value);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.EndVertical();
+            return value;
+#else
+            return DrawObject(fieldName, value, fieldType);
+#endif
         }
         protected virtual object DrawNullable(string fieldName, Type type, object value)
         {
@@ -205,9 +448,98 @@ namespace ActionDesigner.Editor
         {
             return EditorGUILayout.GradientField(fieldName, value);
         }
-        protected virtual UnityEngine.Object DrawObject(string fieldName, object value, Type type)
+        protected virtual object DrawObject(string fieldName, object value, Type type)
         {
-            return EditorGUILayout.ObjectField(fieldName, (UnityEngine.Object)value, type, true);
+            // UnityEngine.Object를 상속하는 경우에만 ObjectField 사용
+            if (typeof(UnityEngine.Object).IsAssignableFrom(type))
+            {
+                return EditorGUILayout.ObjectField(fieldName, (UnityEngine.Object)value, type, true);
+            }
+            // 인터페이스이거나 추상 클래스인 경우 SerializeReference 스타일로 처리
+            else if (type.IsInterface || type.IsAbstract)
+            {
+                return DrawSerializeReferenceStyle(fieldName, type, value);
+            }
+            else
+            {
+                // 일반 클래스인 경우 필드들을 재귀적으로 그리기
+                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.LabelField(fieldName, EditorStyles.boldLabel);
+                
+                if (value != null)
+                {
+                    EditorGUI.indentLevel++;
+                    DrawObjectFields(value);
+                    EditorGUI.indentLevel--;
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("Null");
+                }
+                
+                EditorGUILayout.EndVertical();
+                return value;
+            }
+        }
+        
+        private object DrawSerializeReferenceStyle(string fieldName, Type fieldType, object value)
+        {
+            EditorGUILayout.BeginVertical("box");
+            
+            // 현재 타입 표시
+            string currentTypeName = value?.GetType().Name ?? "None";
+            EditorGUILayout.LabelField($"{fieldName} ({currentTypeName})", EditorStyles.boldLabel);
+            
+            // 타입 선택 드롭다운
+            var availableTypes = GetSerializeReferenceTypes(fieldType);
+            
+            var typeNames = new string[availableTypes.Count + 1];
+            typeNames[0] = "None";
+            
+            int currentIndex = 0;
+            for (int i = 0; i < availableTypes.Count; i++)
+            {
+                typeNames[i + 1] = availableTypes[i].Name;
+                if (value != null && availableTypes[i] == value.GetType())
+                {
+                    currentIndex = i + 1;
+                }
+            }
+            
+            int newIndex = EditorGUILayout.Popup("Type", currentIndex, typeNames);
+            
+            // 타입이 변경되었을 때
+            if (newIndex != currentIndex)
+            {
+                if (newIndex == 0)
+                {
+                    value = null;
+                }
+                else
+                {
+                    var newType = availableTypes[newIndex - 1];
+                    try
+                    {
+                        value = Activator.CreateInstance(newType);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"Failed to create instance of {newType.Name}: {e.Message}");
+                        value = null;
+                    }
+                }
+            }
+            
+            // 현재 객체의 필드들 그리기
+            if (value != null)
+            {
+                EditorGUI.indentLevel++;
+                DrawObjectFields(value);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.EndVertical();
+            return value;
         }
     }
 }

@@ -1,5 +1,4 @@
 using ActionDesigner.Runtime;
-using JuicyFlowChart;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -75,8 +74,6 @@ namespace ActionDesigner.Editor
         {
             if (_actionRunner == null)
                 return;
-
-            // _actionView?.UpdateNodeState(); Runtime에서 실행중인 노드 확인하는 용도
         }
     }
 }

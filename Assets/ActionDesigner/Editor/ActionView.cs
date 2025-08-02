@@ -13,7 +13,7 @@ namespace ActionDesigner.Editor
 {
     public class ActionView : GraphView
     {
-        public new class UxmlFactory : UxmlFactory<ActionView, GraphView.UxmlTraits> { }
+        [Obsolete("Obsolete")] public new class UxmlFactory : UxmlFactory<ActionView, UxmlTraits> { }
         ActionRunner _actionRunner;
         Runtime.Action _action;
 
