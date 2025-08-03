@@ -4,7 +4,7 @@ namespace ActionDesigner.Runtime
 {
     public class ActionRunner : MonoBehaviour
     {
-        [SerializeReference]
+        [SerializeReference, SubclassSelector]
         Action _action = new Action();
 
         public Action action { get => _action; }

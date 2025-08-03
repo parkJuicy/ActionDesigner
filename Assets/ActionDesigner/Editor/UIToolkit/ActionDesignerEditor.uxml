@@ -2,7 +2,7 @@
     <ActionDesigner.Editor.SplitView fixed-pane-initial-dimension="220">
         <ui:VisualElement name="left-panel">
             <ui:Label text="Inspector" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />
-            <ActionDesigner.Editor.InspectorView style="height: 72px; flex-grow: 1;" />
+            <!-- UIToolkitNodeInspector가 코드에서 동적으로 추가됨 -->
         </ui:VisualElement>
         <ui:VisualElement name="right-panel">
             <ui:Label text="Action View" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />

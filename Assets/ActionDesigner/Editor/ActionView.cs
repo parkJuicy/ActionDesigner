@@ -31,6 +31,20 @@ namespace ActionDesigner.Editor
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIToolkitPath.ussPath);
             styleSheets.Add(styleSheet);
         }
+        
+        /// <summary>
+        /// 모든 NodeView의 타이틀을 새로고침
+        /// </summary>
+        public void RefreshAllNodeTitles()
+        {
+            foreach (var element in graphElements)
+            {
+                if (element is NodeView nodeView)
+                {
+                    nodeView.RefreshTitle();
+                }
+            }
+        }
 
         internal void ShowView(ActionRunner actionRunner)
         {

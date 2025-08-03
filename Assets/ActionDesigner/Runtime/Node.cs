@@ -18,7 +18,7 @@ namespace ActionDesigner.Runtime
         public Vector2 position;
         [HideInInspector]
         public List<int> childrenID = new List<int>();
-        [SerializeReference]
+        [SerializeReference, SubclassSelector]
         public Task task;
         [HideInInspector]
         public string baseType;

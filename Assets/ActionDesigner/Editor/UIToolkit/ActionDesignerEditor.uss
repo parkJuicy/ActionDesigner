@@ -3,5 +3,67 @@ GridBackground {
     --line-color: rgba(193, 196, 192, 0.1);
     --thick-line-color: rgba(193, 196, 192, 0.1);
     --spacing: 15;
-    background-color: rgb(255, 0, 0);
+    background-color: rgb(40, 40, 40);
+}
+
+/* ActionDesigner Main Layout */
+#left-panel {
+    background-color: rgb(56, 56, 56);
+    border-right-width: 1px;
+    border-right-color: rgb(35, 35, 35);
+}
+
+#right-panel {
+    background-color: rgb(48, 48, 48);
+}
+
+/* Panel Headers */
+#left-panel > Label,
+#right-panel > Label {
+    background-color: rgb(70, 70, 70);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: rgb(210, 210, 210);
+    -unity-font-style: bold;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(35, 35, 35);
+}
+
+/* Action Name Label */
+#actionName {
+    padding: 10px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgba(255, 225, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin: 5px;
+}
+
+/* SplitView Styles */
+.unity-split-view {
+    background-color: rgb(48, 48, 48);
+}
+
+.unity-split-view__dragline {
+    background-color: rgb(35, 35, 35);
+    width: 2px;
+}
+
+.unity-split-view__dragline:hover {
+    background-color: rgb(58, 121, 187);
+}
+
+/* General Responsive Design */
+@media (max-width: 600px) {
+    #actionName {
+        font-size: 16px;
+        padding: 8px;
+    }
+    
+    #left-panel > Label,
+    #right-panel > Label {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
 }

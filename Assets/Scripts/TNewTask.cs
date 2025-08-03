@@ -1,8 +1,10 @@
+using System;
 using ActionDesigner.Runtime;
 using UnityEngine;
 
 namespace deep
 {
+    [Serializable]
     public class TNewTask : Transition
     {
         [SerializeField] AnimationClip animationClip;

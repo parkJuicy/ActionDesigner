@@ -15,12 +15,9 @@ namespace ActionDesigner.Editor
     public class ActionDesignerEditor : EditorWindow
     {
         ActionRunner _actionRunner;
-
         ActionView _actionView;
-        InspectorView _inspectorView;
-
+        UIToolkitNodeInspector _nodeInspector;
         Label _actionNameLabel;
-        string _selectedAction;
 
         [MenuItem("Action Designer/Editor...")]
         public static void OpenWindow()
@@ -39,16 +36,31 @@ namespace ActionDesigner.Editor
             root.styleSheets.Add(styleSheet);
 
             _actionView = root.Q<ActionView>();
-            _inspectorView = root.Q<InspectorView>();
+            
+            // 기존 InspectorView를 UIToolkitNodeInspector로 교체
+            var leftPanel = root.Q<VisualElement>("left-panel");
+            var oldInspector = leftPanel.Query<VisualElement>().Where(e => e.GetType().Name.Contains("Inspector")).First();
+            if (oldInspector != null)
+            {
+                leftPanel.Remove(oldInspector);
+            }
+            
+            _nodeInspector = new UIToolkitNodeInspector();
+            _nodeInspector.style.flexGrow = 1;
+            _nodeInspector.OnTaskChanged = () => {
+                // Task가 변경되면 즉시 NodeView 타이틀 새로고침
+                _actionView?.RefreshAllNodeTitles();
+            };
+            leftPanel.Add(_nodeInspector);
+        
             _actionNameLabel = _actionView.Q<Label>("actionName");
-
             _actionView.OnNodeSelected = OnNodeSelectionChanged;
             OnSelectionChange();
         }
 
         void OnNodeSelectionChanged(NodeView nodeView)
         {
-            _inspectorView.ShowInspector(nodeView, _actionRunner);
+            _nodeInspector?.ShowInspector(nodeView, _actionRunner);
         }
 
         void OnSelectionChange()
@@ -67,13 +79,19 @@ namespace ActionDesigner.Editor
             _actionRunner = null;
             _actionNameLabel.text = null;
             _actionView?.ClearView();
-            _inspectorView?.Clear();
+            _nodeInspector?.Clear();
         }
 
         void OnInspectorUpdate()
         {
             if (_actionRunner == null)
                 return;
+                
+            // NodeView 타이틀 새로고침 (0.5초마다)
+            if (EditorApplication.timeSinceStartup % 0.5f < 0.1f)
+            {
+                _actionView?.RefreshAllNodeTitles();
+            }
         }
     }
 }

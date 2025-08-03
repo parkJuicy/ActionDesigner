@@ -11,6 +11,7 @@ namespace ActionDesigner.Editor
         private Port input;
         private Port output;
         private bool _isRoot;
+        private string _lastTaskTypeName; // Task 타입 변경 감지용
 
         public Runtime.Node Node { get => _node; }
         public Port Input { get => input; }
@@ -22,7 +23,8 @@ namespace ActionDesigner.Editor
         {
             _node = node;
             _isRoot = isRoot;
-            title = _node.type;
+            
+            UpdateTitle(); // 초기 타이틀 설정
             viewDataKey = _node.id.ToString();
 
             InitNodeStyle();
@@ -31,6 +33,65 @@ namespace ActionDesigner.Editor
                 CreateInputPorts();
             CreateOutputPorts();
             SetupClasses();
+            
+            // 주기적으로 Task 타입 변경 확인
+            schedule.Execute(() => CheckForTaskTypeChanges()).Every(100); // 100ms마다 확인
+        }
+        
+        /// <summary>
+        /// 외부에서 호출할 수 있는 타이틀 업데이트 메서드
+        /// </summary>
+        public void RefreshTitle()
+        {
+            UpdateTitle();
+        }
+        
+        /// <summary>
+        /// Task 타입에 따라 노드 타이틀 업데이트
+        /// </summary>
+        private void UpdateTitle()
+        {
+            string displayTitle = "Unknown";
+            
+            if (_node.task != null)
+            {
+                // Task가 있으면 Task 타입명 사용
+                var taskType = _node.task.GetType();
+                displayTitle = UnityEditor.ObjectNames.NicifyVariableName(taskType.Name);
+                _lastTaskTypeName = taskType.Name;
+            }
+            else if (!string.IsNullOrEmpty(_node.type))
+            {
+                // Task가 없으면 노드의 기본 타입 사용
+                displayTitle = UnityEditor.ObjectNames.NicifyVariableName(_node.type);
+                _lastTaskTypeName = _node.type;
+            }
+            
+            title = displayTitle;
+        }
+        
+        /// <summary>
+        /// Task 타입 변경 감지 및 타이틀 업데이트
+        /// </summary>
+        private void CheckForTaskTypeChanges()
+        {
+            if (_node?.task == null)
+            {
+                // Task가 null이 된 경우
+                if (_lastTaskTypeName != "None")
+                {
+                    _lastTaskTypeName = "None";
+                    UpdateTitle();
+                }
+                return;
+            }
+            
+            string currentTaskTypeName = _node.task.GetType().Name;
+            if (currentTaskTypeName != _lastTaskTypeName)
+            {
+                // Task 타입이 변경된 경우
+                UpdateTitle();
+            }
         }
 
         private void InitNodeStyle()
