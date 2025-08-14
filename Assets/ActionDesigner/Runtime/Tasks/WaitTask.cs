@@ -3,7 +3,7 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Tasks
 {
     [System.Serializable]
-    public class WaitTask : Motion
+    public class WaitTask : IMotion
     {
         [SerializeField]
         public float waitTime = 1.0f;
@@ -20,8 +20,9 @@ namespace ActionDesigner.Runtime.Tasks
         private float _startTime;
         private float _actualWaitTime;
 
-        public override void Initialize(ActionRunner runner)
+        public void Start()
         {
+            Debug.Log("웨이트 스타또");
             _startTime = useUnscaledTime ? Time.unscaledTime : Time.time;
             
             if (randomizeTime)
@@ -34,28 +35,22 @@ namespace ActionDesigner.Runtime.Tasks
             }
         }
 
-        public override bool Update(ActionRunner runner)
+        public bool Update()
         {
             float currentTime = useUnscaledTime ? Time.unscaledTime : Time.time;
             float elapsedTime = currentTime - _startTime;
             
             return elapsedTime >= _actualWaitTime;
         }
-
-        public override float GetProgress()
+        
+        public void End()
         {
-            float currentTime = useUnscaledTime ? Time.unscaledTime : Time.time;
-            float elapsedTime = currentTime - _startTime;
-            return Mathf.Clamp01(elapsedTime / _actualWaitTime);
+            Debug.Log("웨이트 엔드");
         }
 
-        public override string GetDescription()
+        public void Stop()
         {
-            if (randomizeTime)
-            {
-                return $"Wait {randomTimeRange.x}-{randomTimeRange.y}s";
-            }
-            return $"Wait {waitTime}s";
+            Debug.Log("웨이트 스탑");
         }
     }
 }

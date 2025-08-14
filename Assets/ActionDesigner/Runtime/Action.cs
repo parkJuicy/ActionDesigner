@@ -41,7 +41,6 @@ namespace ActionDesigner.Runtime
         {
             BaseNode node;
             
-            // 노드 타입에 따라 적절한 노드 생성
             if (baseType == "Motion")
             {
                 node = new MotionNode();
@@ -56,13 +55,10 @@ namespace ActionDesigner.Runtime
                 return null;
             }
             
-            // 기본 정보 설정
             node.type = type;
             node.nameSpace = namespaceType;
             node.id = GUID.Generate().GetHashCode();
             node.position = position;
-            
-            // type/namespace 기반으로 실제 객체 생성
             node.CreateNodeObject();
             
             nodes.Add(node);
@@ -76,7 +72,6 @@ namespace ActionDesigner.Runtime
                 rootID = 0;
             }
 
-            // 이 노드를 참조하는 모든 연결 제거
             foreach (var n in nodes)
             {
                 n.childrenID.Remove(node.id);

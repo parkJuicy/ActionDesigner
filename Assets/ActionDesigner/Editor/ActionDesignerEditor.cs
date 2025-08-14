@@ -113,7 +113,7 @@ namespace ActionDesigner.Editor
             if (_actionRunner != null)
             {
                 // ActionRunner가 여전히 유효한지 확인
-                if (_actionRunner == null || _actionRunner.action == null)
+                if (_actionRunner == null || _actionRunner.Action == null)
                 {
                     // ActionRunner가 사라졌거나 데이터가 손상됨
                     Debug.LogWarning("Action Designer: ActionRunner 또는 Action 데이터가 손실됨. 비어있는 상태로 전환.");

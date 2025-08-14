@@ -10,7 +10,7 @@ namespace ActionDesigner.Runtime
     public class MotionNode : BaseNode
     {
         [SerializeReference, SubclassSelector]
-        public Motion motion;
+        public IMotion motion;
 
         public override string GetDisplayName()
         {
@@ -32,7 +32,6 @@ namespace ActionDesigner.Runtime
 
         public override bool CanAddChild()
         {
-            // Motion은 여러 자식 가능 (하지만 체인 구조에서는 보통 1개)
             return true;
         }
 
@@ -46,15 +45,12 @@ namespace ActionDesigner.Runtime
             if (string.IsNullOrEmpty(type)) return;
 
             var operationType = Action.GetOperationType(nameSpace, type);
-            if (operationType != null && typeof(Motion).IsAssignableFrom(operationType))
+            if (operationType != null && typeof(IMotion).IsAssignableFrom(operationType))
             {
-                motion = Activator.CreateInstance(operationType) as Motion;
+                motion = Activator.CreateInstance(operationType) as IMotion;
             }
         }
-
-        /// <summary>
-        /// Motion이 유효한지 확인
-        /// </summary>
+        
         public bool IsValid => motion != null;
     }
 }

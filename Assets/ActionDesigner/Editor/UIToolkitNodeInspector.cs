@@ -1,19 +1,12 @@
 using ActionDesigner.Runtime;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Motion = ActionDesigner.Runtime.Motion;
-using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
-    /// <summary>
-    /// Unity Inspector와 유사한 방식으로 작동하는 UI Toolkit 기반 Inspector
-    /// </summary>
     public class UIToolkitNodeInspector : VisualElement
     {
         [Obsolete("Obsolete")] public new class UxmlFactory : UxmlFactory<UIToolkitNodeInspector, UxmlTraits> { }
@@ -26,7 +19,6 @@ namespace ActionDesigner.Editor
         private ScrollView _scrollView;
         private VisualElement _contentContainer;
         
-        // Motion/Condition 변경 이벤트
         public System.Action OnTaskChanged { get; set; }
 
         public UIToolkitNodeInspector()
@@ -76,9 +68,7 @@ namespace ActionDesigner.Editor
         private void CreateSerializedObjects()
         {
             _serializedObject = new SerializedObject(_actionRunner);
-            
-            // ActionRunner의 _action.nodes에서 현재 노드의 인덱스 찾기
-            var nodes = _actionRunner.action.nodes;
+            var nodes = _actionRunner.Action.nodes;
             int nodeIndex = -1;
             
             for (int i = 0; i < nodes.Count; i++)
@@ -92,7 +82,7 @@ namespace ActionDesigner.Editor
 
             if (nodeIndex >= 0)
             {
-                _nodeProperty = _serializedObject.FindProperty($"_action.nodes.Array.data[{nodeIndex}]");
+                _nodeProperty = _serializedObject.FindProperty($"action.nodes.Array.data[{nodeIndex}]");
             }
         }
 

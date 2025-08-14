@@ -3,15 +3,15 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Conditions
 {
     [System.Serializable]
-    public class KeyPressCondition : Condition
+    public class KeyPressCondition : ICondition
     {
         [SerializeField]
         public KeyCode keyCode = KeyCode.Space;
         
         [SerializeField]
-        public bool requireKeyDown = true; // true: GetKeyDown, false: GetKey
+        public bool requireKeyDown = true;
 
-        public override bool Evaluate(ActionRunner runner)
+        public bool Evaluate()
         {
             if (requireKeyDown)
             {
@@ -22,13 +22,10 @@ namespace ActionDesigner.Runtime.Conditions
                 return Input.GetKey(keyCode);
             }
         }
-
-        public override bool IsWaitCondition => requireKeyDown; // KeyDown은 매 프레임 체크 필요
-
-        public override string GetDescription()
+        
+        public void OnSuccess()
         {
-            string action = requireKeyDown ? "Press" : "Hold";
-            return $"{action} {keyCode}";
+            Debug.Log($"KEY OnSuccess - {keyCode} 키로 인한 전환!");
         }
     }
 }

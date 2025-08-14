@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using Motion = ActionDesigner.Runtime.Motion;
-using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
@@ -46,7 +44,7 @@ namespace ActionDesigner.Editor
         {
             tree.Add(new SearchTreeGroupEntry(new GUIContent("Motion"), 1));
 
-            var motionTypes = TypeCache.GetTypesDerivedFrom<Motion>();
+            var motionTypes = TypeCache.GetTypesDerivedFrom<IMotion>();
             var namespaceGroups = new Dictionary<string, List<Type>>();
 
             // Namespace별로 그룹화
@@ -104,7 +102,7 @@ namespace ActionDesigner.Editor
         {
             tree.Add(new SearchTreeGroupEntry(new GUIContent("Condition"), 1));
 
-            var conditionTypes = TypeCache.GetTypesDerivedFrom<Condition>();
+            var conditionTypes = TypeCache.GetTypesDerivedFrom<ICondition>();
             var namespaceGroups = new Dictionary<string, List<Type>>();
 
             // Namespace별로 그룹화

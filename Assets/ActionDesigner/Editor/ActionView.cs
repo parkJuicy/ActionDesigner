@@ -7,8 +7,6 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Motion = ActionDesigner.Runtime.Motion;
-using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
@@ -160,7 +158,7 @@ namespace ActionDesigner.Editor
         internal void ShowView(ActionRunner actionRunner)
         {
             _actionRunner = actionRunner;
-            _action = actionRunner.action;
+            _action = actionRunner.Action;
 
             graphViewChanged -= OnGraphViewChanged;
             DeleteElements(graphElements.ToList());
@@ -546,7 +544,7 @@ namespace ActionDesigner.Editor
             }
             
             // 현재 실행 중인 노드 ID 가져오기
-            int currentExecutingNodeID = _actionRunner.isRunning ? _actionRunner.currentNodeID : 0;
+            int currentExecutingNodeID = _actionRunner.currentState == ActionRunnerState.Running ? _actionRunner.currentNodeID : 0;
             
             // 이전과 다르면 하이라이팅 업데이트
             if (currentExecutingNodeID != _lastExecutingNodeID)

@@ -3,15 +3,13 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Motion = ActionDesigner.Runtime.Motion;
-using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
     /// <summary>
     /// Motion 타입을 위한 PropertyDrawer
     /// </summary>
-    [CustomPropertyDrawer(typeof(Motion), true)]
+    [CustomPropertyDrawer(typeof(IMotion), true)]
     public class MotionPropertyDrawer : PropertyDrawer
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
@@ -41,7 +39,7 @@ namespace ActionDesigner.Editor
     /// <summary>
     /// Condition 타입을 위한 PropertyDrawer
     /// </summary>
-    [CustomPropertyDrawer(typeof(Condition), true)]
+    [CustomPropertyDrawer(typeof(ICondition), true)]
     public class ConditionPropertyDrawer : PropertyDrawer
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)

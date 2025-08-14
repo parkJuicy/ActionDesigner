@@ -3,33 +3,24 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Tasks
 {
     [System.Serializable]
-    public class DebugLogTask : Motion
+    public class DebugLogTask : IMotion
     {
         [SerializeField]
         public string message = "Hello World!";
         
         [SerializeField]
-        public bool useCustomColor = false;
-        
-        [SerializeField]
-        public Color logColor = Color.white;
-        
-        [SerializeField]
         public float delay = 0f;
-        
-        [SerializeField]
-        public bool includeTimestamp = true;
 
         private bool _executed = false;
         private float _startTime;
 
-        public override void Initialize(ActionRunner runner)
+        public void Start()
         {
             _executed = false;
             _startTime = Time.time;
         }
 
-        public override bool Update(ActionRunner runner)
+        public bool Update()
         {
             if (_executed) return true;
 
@@ -39,36 +30,19 @@ namespace ActionDesigner.Runtime.Tasks
                 return false;
             }
 
-            // 로그 출력
-            string logMessage = message;
-            
-            if (includeTimestamp)
-            {
-                logMessage = $"[{Time.time:F2}s] {logMessage}";
-            }
-
-            if (useCustomColor)
-            {
-                string colorHex = ColorUtility.ToHtmlStringRGB(logColor);
-                logMessage = $"<color=#{colorHex}>{logMessage}</color>";
-            }
-
-            Debug.Log(logMessage);
+            Debug.Log(message);
             _executed = true;
             return true;
         }
-
-        public override float GetProgress()
+        
+        public void End()
         {
-            if (delay <= 0) return _executed ? 1.0f : 0.0f;
-            
-            float elapsed = Time.time - _startTime;
-            return Mathf.Clamp01(elapsed / delay);
+            Debug.Log("디버그 엔드");
         }
 
-        public override string GetDescription()
+        public void Stop()
         {
-            return $"Log: {message}";
+            Debug.Log("디버그 스탑");
         }
     }
 }

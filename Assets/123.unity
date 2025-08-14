@@ -241,75 +241,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _action:
-    rid: 8126778838887956559
+    rid: 8126778838887956819
   _autoStart: 1
-  _loop: 1
   _currentNodeID: 0
   _isRunning: 0
-  _currentState: Idle
-  _motionProgress: 0
+  _currentState: 0
   references:
     version: 2
     RefIds:
-    - rid: 8126778838887956559
+    - rid: 8126778838887956819
       type: {class: Action, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
-        rootID: 1993628964
+        rootID: 960866580
         nodes:
-        - rid: 8126778838887956560
-        - rid: 8126778838887956562
-        - rid: 8126778838887956564
-    - rid: 8126778838887956560
+        - rid: 8126778838887956820
+    - rid: 8126778838887956820
       type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
-        type: DebugLogTask
+        type: WaitTask
         nameSpace: ActionDesigner.Runtime.Tasks
-        id: 1993628964
-        position: {x: 247, y: 147}
-        childrenID: df1f19ba
-        motion:
-          rid: 8126778838887956561
-    - rid: 8126778838887956561
-      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
-      data:
-        message: Hello World!
-        useCustomColor: 0
-        logColor: {r: 1, g: 1, b: 1, a: 1}
-        delay: 0
-        includeTimestamp: 1
-    - rid: 8126778838887956562
-      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
-      data:
-        type: KeyPressCondition
-        nameSpace: ActionDesigner.Runtime.Conditions
-        id: -1172758561
-        position: {x: 138, y: 291}
-        childrenID: 8ebb6fb6
-        condition:
-          rid: 8126778838887956563
-    - rid: 8126778838887956563
-      type: {class: KeyPressCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
-      data:
-        keyCode: 32
-        requireKeyDown: 1
-    - rid: 8126778838887956564
-      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
-      data:
-        type: DebugLogTask
-        nameSpace: ActionDesigner.Runtime.Tasks
-        id: -1234191474
-        position: {x: 167, y: 445}
+        id: 960866580
+        position: {x: 210, y: 227}
         childrenID: 
         motion:
-          rid: 8126778838887956565
-    - rid: 8126778838887956565
-      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
+          rid: 8126778838887956821
+    - rid: 8126778838887956821
+      type: {class: WaitTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
       data:
-        message: 222
-        useCustomColor: 0
-        logColor: {r: 1, g: 1, b: 1, a: 1}
-        delay: 0
-        includeTimestamp: 1
+        waitTime: 1
+        useUnscaledTime: 0
+        randomizeTime: 0
+        randomTimeRange: {x: 0.5, y: 2}
 --- !u!4 &1484965530
 Transform:
   m_ObjectHideFlags: 0

@@ -3,16 +3,16 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Conditions
 {
     [System.Serializable]
-    public class AlwaysTrueCondition : Condition
+    public class AlwaysTrueCondition : ICondition
     {
-        public override bool Evaluate(ActionRunner runner)
+        public bool Evaluate()
         {
-            return true; // 항상 조건 만족
+            return true;
         }
-
-        public override string GetDescription()
+        
+        public void OnSuccess()
         {
-            return "Always True";
+            Debug.Log("ALWAYS OnSuccess - 항상 True 조건으로 인한 전환!");
         }
     }
 }

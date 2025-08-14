@@ -10,7 +10,7 @@ namespace ActionDesigner.Runtime
     public class ConditionNode : BaseNode
     {
         [SerializeReference, SubclassSelector]
-        public Condition condition;
+        public ICondition condition;
 
         public override string GetDisplayName()
         {
@@ -46,9 +46,9 @@ namespace ActionDesigner.Runtime
             if (string.IsNullOrEmpty(type)) return;
 
             var operationType = Action.GetOperationType(nameSpace, type);
-            if (operationType != null && typeof(Condition).IsAssignableFrom(operationType))
+            if (operationType != null && typeof(ICondition).IsAssignableFrom(operationType))
             {
-                condition = Activator.CreateInstance(operationType) as Condition;
+                condition = Activator.CreateInstance(operationType) as ICondition;
             }
         }
 

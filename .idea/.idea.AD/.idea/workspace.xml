@@ -4,7 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="42cdf4f3-a35f-4073-b08a-92646750210e" name="변경" comment="" />
+    <list default="true" id="42cdf4f3-a35f-4073-b08a-92646750210e" name="변경" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/EndCondition.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/EndCondition.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ICondition.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/IMotion.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AD/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AD/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/123.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/123.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionDesignerEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionDesignerEditor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeSearchWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeSearchWindow.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskPropertyDrawer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskPropertyDrawer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkitNodeInspector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkitNodeInspector.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ConditionNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ConditionNode.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/AlwaysTrueCondition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/AlwaysTrueCondition.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/KeyPressCondition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Conditions/KeyPressCondition.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Motion.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Motion.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/IMotion.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/MotionNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/MotionNode.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Transition.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Transition.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ICondition.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,6 +39,7 @@
     <setting file="file://$PROJECT_DIR$/../../../../Program Files/Unity/Hub/Editor/6000.0.54f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Editor/UGUI/UI/SelectableEditor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../Program Files/Unity/Hub/Editor/6000.0.54f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Tests/Runtime/UGUI/InputField/InputFieldTests.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../Program Files/Unity/Hub/Editor/6000.0.54f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Tests/Runtime/UGUI/InputField/TouchInputFieldTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/966ba44edc314da3aa4f8ea2922f18499c3200/f4/0bc21261/SerializedObject.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d8e86d9f09f74770aeb749cd04c0953f3ec00/d0/420cd5d6/Node.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -59,10 +85,10 @@
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
       <method v="2" />
     </configuration>
-    <configuration name="Unity 에디터에 연결" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Unity 에디터에 연결" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="36292">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="36292" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -108,5 +134,24 @@
   <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs</url>
+          <line>87</line>
+          <properties documentPath="C:\Users\dcjun\source\AD\Assets\ActionDesigner\Runtime\ActionRunner.cs" containingFunctionPresentation="메서드 'UpdateMotionWithTransitions'">
+            <startOffsets>
+              <option value="2291" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2292" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

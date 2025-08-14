@@ -1,139 +1,38 @@
 using UnityEngine;
+using ActionDesigner.Runtime.Conditions;
 
 namespace ActionDesigner.Runtime
 {
-    /// <summary>
-    /// ActionRunner 상태 열거형
-    /// </summary>
     public enum ActionRunnerState
     {
         Idle,
-        ExecutingMotion,
-        EvaluatingCondition,
-        Completed,
-        Stopped,
+        Running,
         Paused
     }
 
-    /// <summary>
-    /// Action을 실행하는 MonoBehaviour (Update 기반)
-    /// Motion → Condition → Motion 체인 구조로 실행
-    /// </summary>
     public class ActionRunner : MonoBehaviour
     {
-        [SerializeReference, SubclassSelector]
-        Action _action = new Action();
+        [SerializeReference] Action action = new Action();
+        [SerializeField] bool autoStart = true;
 
-        [Header("Runtime Settings")]
-        [SerializeField] private bool _autoStart = true;
-        [SerializeField] private bool _loop = false;
+        BaseNode currentNode;
+        bool isMotionCompleted;
 
-        [Header("Debug Info")]
-        [SerializeField] private int _currentNodeID = 0;
-        [SerializeField] private bool _isRunning = false;
-        [SerializeField] private ActionRunnerState _currentState = ActionRunnerState.Idle;
+        public Action Action => action;
+        public ActionRunnerState currentState { get; private set; }
+        public int currentNodeID { get; private set; }
 
-        private BaseNode _currentNode;
-        private bool _motionCompleted = false;
-        private float _motionStartTime;
-
-        // Public Properties
-        public Action action => _action;
-        public bool isRunning => _isRunning;
-        public int currentNodeID => _currentNodeID;
-        public BaseNode currentNode => _currentNode;
-        public ActionRunnerState currentState => _currentState;
-
-        private void Start()
+        void Start()
         {
-            if (_autoStart && _action != null)
+            if (autoStart && action != null)
             {
                 StartAction();
             }
         }
 
-        private void Update()
-        {
-            if (!_isRunning || _currentNode == null) return;
-
-            if (_currentNode is MotionNode motionNode && !_motionCompleted)
-            {
-                UpdateMotion();
-            }
-            else if (_currentNode is ConditionNode conditionNode)
-            {
-                UpdateCondition();
-            }
-        }
-
-        /// <summary>
-        /// Motion 업데이트 처리
-        /// </summary>
-        private void UpdateMotion()
-        {
-            var motionNode = _currentNode as MotionNode;
-            if (motionNode?.motion == null) return;
-
-            _currentState = ActionRunnerState.ExecutingMotion;
-
-            // Motion 업데이트
-            _motionCompleted = motionNode.motion.Update(this);
-
-            if (_motionCompleted)
-            {
-                motionNode.motion.OnComplete(this);
-                MoveToNextNode();
-            }
-        }
-
-        /// <summary>
-        /// Condition 업데이트 처리  
-        /// </summary>
-        private void UpdateCondition()
-        {
-            var conditionNode = _currentNode as ConditionNode;
-            if (conditionNode?.condition == null) return;
-
-            _currentState = ActionRunnerState.EvaluatingCondition;
-
-            conditionNode.condition.Initialize(this);
-            bool conditionMet = false;
-
-            if (conditionNode.condition.IsWaitCondition)
-            {
-                // 대기형 조건: 조건이 만족될 때까지 매 프레임 체크
-                conditionMet = conditionNode.condition.Evaluate(this);
-                if (!conditionMet)
-                {
-                    return; // 다음 프레임에 다시 체크
-                }
-            }
-            else
-            {
-                // 즉시 평가 조건
-                conditionMet = conditionNode.condition.Evaluate(this);
-            }
-
-            conditionNode.condition.Cleanup(this);
-
-            if (conditionMet)
-            {
-                // 조건 만족 시 다음 Motion으로 진행
-                MoveToNextNode();
-            }
-            else
-            {
-                // 조건 불만족 시 처리
-                HandleConditionFailed();
-            }
-        }
-
-        /// <summary>
-        /// Action 실행 시작
-        /// </summary>
         public void StartAction()
         {
-            var rootNode = _action?.GetRootNode();
+            var rootNode = action?.GetRootNode();
             if (rootNode == null)
             {
                 return;
@@ -144,194 +43,171 @@ namespace ActionDesigner.Runtime
                 return;
             }
 
-            _isRunning = true;
-            _currentNode = rootNode;
-            _currentNodeID = _currentNode.id;
-            _motionCompleted = false;
-            _motionStartTime = Time.time;
+            currentState = ActionRunnerState.Running;
+            currentNode = rootNode;
+            currentNodeID = currentNode.id;
+            isMotionCompleted = false;
 
             StartCurrentNode();
         }
 
-        /// <summary>
-        /// Action 실행 중단
-        /// </summary>
         public void StopAction()
         {
-            if (_isRunning && _currentNode is MotionNode motionNode && !_motionCompleted)
+            if (currentNode is MotionNode motionNode)
             {
                 motionNode.motion?.Stop();
+                EndAllConditionsForMotion(motionNode);
             }
 
-            _isRunning = false;
-            _currentNode = null;
-            _currentNodeID = 0;
-            _motionCompleted = false;
-            _currentState = ActionRunnerState.Stopped;
+            currentNode = null;
+            currentNodeID = 0;
+            isMotionCompleted = false;
+            currentState = ActionRunnerState.Idle;
         }
 
-        /// <summary>
-        /// Action 재시작 (루프용)
-        /// </summary>
-        private void RestartAction()
+        public void PauseAction()
         {
-            StartAction();
+            if (currentState == ActionRunnerState.Running)
+                currentState = ActionRunnerState.Paused;
+            else if (currentState == ActionRunnerState.Paused)
+                currentState = ActionRunnerState.Running;
         }
 
-        /// <summary>
-        /// 현재 노드 시작
-        /// </summary>
-        private void StartCurrentNode()
+        void Update()
         {
-            if (_currentNode == null) return;
+            if (currentState != ActionRunnerState.Running || currentNode == null)
+                return;
 
-            if (_currentNode is MotionNode motionNode)
+            if (currentNode is MotionNode motionNode)
             {
-                motionNode.motion?.Initialize(this);
-                _motionStartTime = Time.time;
-                _motionCompleted = false;
+                UpdateMotionWithTransitions(motionNode);
             }
         }
 
-        /// <summary>
-        /// 다음 노드로 이동
-        /// </summary>
-        private void MoveToNextNode()
+        void UpdateMotionWithTransitions(MotionNode motionNode)
         {
-            var nextNode = GetNextNode(_currentNode);
+            if (motionNode?.motion == null) return;
+            isMotionCompleted = motionNode.motion.Update();
+            BaseNode nextNode = EvaluateTransitions(motionNode);
 
-            if (nextNode != null)
+            if (nextNode == null || isMotionCompleted && motionNode.childrenID.Count == 0)
             {
-                _currentNode = nextNode;
-                _currentNodeID = _currentNode.id;
-                StartCurrentNode();
+                CompleteAction(motionNode);
+                return;
             }
-            else
+
+            if (nextNode != currentNode)
             {
-                // Action 완료
-                HandleActionCompleted();
+                if (isMotionCompleted)
+                    motionNode.motion.End();
+                else
+                    motionNode.motion.Stop();
+                EndAllConditionsForMotion(motionNode);
+                TransitionToNode(nextNode);
             }
         }
 
-        /// <summary>
-        /// Action 완료 처리
-        /// </summary>
-        private void HandleActionCompleted()
+        BaseNode EvaluateTransitions(MotionNode motionNode)
         {
-            if (_loop)
+            if (motionNode.childrenID.Count == 0) return null;
+
+            foreach (var childID in motionNode.childrenID)
             {
-                RestartAction();
+                var conditionNode = action.FindNode(childID) as ConditionNode;
+                if (conditionNode?.condition == null) continue;
+
+                bool conditionSuccess = isMotionCompleted;
+                if (conditionNode.condition is not EndCondition)
+                {
+                    conditionSuccess = conditionNode.condition.Evaluate();
+                }
+
+                if (conditionSuccess)
+                {
+                    conditionNode.condition.OnSuccess();
+                    if (conditionNode.childrenID.Count == 0)
+                        return null;
+
+                    return GetNextMotionFromCondition(conditionNode);
+                }
             }
-            else
-            {
-                _isRunning = false;
-                _currentNode = null;
-                _currentNodeID = 0;
-                _currentState = ActionRunnerState.Completed;
-            }
+            return motionNode;
         }
 
-        /// <summary>
-        /// 조건 실패 처리
-        /// </summary>
-        private void HandleConditionFailed()
+        BaseNode GetNextMotionFromCondition(ConditionNode conditionNode)
         {
-            if (_loop)
+            if (conditionNode.childrenID.Count > 0)
             {
-                RestartAction();
-            }
-            else
-            {
-                StopAction();
-            }
-        }
-
-        /// <summary>
-        /// 다음 노드 반환
-        /// </summary>
-        private BaseNode GetNextNode(BaseNode node)
-        {
-            if (node.childrenID.Count > 0)
-            {
-                return _action.FindNode(node.childrenID[0]);
+                var nextNodeID = conditionNode.childrenID[0];
+                var nextNode = action.FindNode(nextNodeID);
+                if (nextNode is MotionNode motionNode && motionNode.IsValid)
+                {
+                    return nextNode;
+                }
             }
             return null;
         }
 
-        /// <summary>
-        /// 현재 Motion의 진행 시간 반환
-        /// </summary>
-        public float GetMotionElapsedTime()
+        void TransitionToNode(BaseNode nextNode)
         {
-            return Time.time - _motionStartTime;
+            currentNode = nextNode;
+            currentNodeID = currentNode.id;
+            isMotionCompleted = false;
+            StartCurrentNode();
         }
 
-        /// <summary>
-        /// Action 일시정지/재개
-        /// </summary>
-        public void PauseAction()
+        void EndAllConditionsForMotion(MotionNode motionNode)
         {
-            if (!_isRunning) return;
-
-            _isRunning = !_isRunning;
-            _currentState = _isRunning ? ActionRunnerState.ExecutingMotion : ActionRunnerState.Paused;
-        }
-
-        /// <summary>
-        /// 에디터용 미리보기
-        /// </summary>
-        [ContextMenu("Preview Action")]
-        public void PreviewAction()
-        {
-            if (!Application.isPlaying)
+            foreach (var childID in motionNode.childrenID)
             {
-                Debug.LogWarning("Action preview is only available in Play Mode");
-                return;
+                var conditionNode = action.FindNode(childID) as ConditionNode;
+                if (conditionNode?.condition != null)
+                {
+                    conditionNode.condition.End();
+                }
             }
-            StartAction();
         }
 
-        /// <summary>
-        /// 에디터용 액션 정지
-        /// </summary>
-        [ContextMenu("Stop Action")]
-        public void StopActionFromMenu()
+        void StartAllConditionsForMotion(MotionNode motionNode)
         {
-            if (!Application.isPlaying) return;
-            StopAction();
-        }
-
-        /// <summary>
-        /// 에디터용 상태 리셋
-        /// </summary>
-        [ContextMenu("Reset State")]
-        public void ResetState()
-        {
-            if (Application.isPlaying)
+            foreach (var childID in motionNode.childrenID)
             {
-                StopAction();
+                var conditionNode = action.FindNode(childID) as ConditionNode;
+                if (conditionNode?.condition != null)
+                {
+                    conditionNode.condition.Start();
+                }
             }
-
-            _currentNodeID = 0;
-            _currentState = ActionRunnerState.Idle;
         }
 
-        private void OnDisable()
+        void StartCurrentNode()
         {
-            if (_isRunning)
+            if (currentNode == null) return;
+
+            if (currentNode is MotionNode motionNode)
+            {
+                motionNode.motion?.Start();
+                isMotionCompleted = false;
+                StartAllConditionsForMotion(motionNode);
+            }
+        }
+
+        void OnDisable()
+        {
+            if (currentState != ActionRunnerState.Idle)
             {
                 StopAction();
             }
         }
 
-        private void OnDrawGizmos()
+        void CompleteAction(MotionNode motionNode)
         {
-            // 에디터에서 현재 상태 시각화
-            if (_isRunning && _currentNode != null)
-            {
-                Gizmos.color = _currentNode is MotionNode ? Color.red : Color.blue;
-                Gizmos.DrawWireSphere(transform.position + Vector3.up, 0.5f);
-            }
+            motionNode.motion.End();
+            EndAllConditionsForMotion(motionNode);
+            currentNode = null;
+            currentNodeID = 0;
+            isMotionCompleted = false;
+            currentState = ActionRunnerState.Idle;
         }
     }
 }
