@@ -18,6 +18,10 @@ namespace ActionDesigner.Editor
         ActionRunner _actionRunner;
         Runtime.Action _action;
         Vector2 _lastMousePosition;
+        
+        // 런타임 하이라이팅을 위한 변수들
+        private int _lastExecutingNodeID = 0;
+        private bool _isRuntimeUpdateActive = false;
 
         public Action<NodeView> OnNodeSelected { get; internal set; }
 
@@ -164,10 +168,16 @@ namespace ActionDesigner.Editor
 
             DrawNode();
             DrawEdge();
+            
+            // 런타임 업데이트 시작
+            StartRuntimeUpdate();
         }
 
         internal void ClearView()
         {
+            // 런타임 업데이트 중단
+            StopRuntimeUpdate();
+            
             _actionRunner = null;
             _action = null;
             DeleteElements(graphElements.ToList());
@@ -486,6 +496,91 @@ namespace ActionDesigner.Editor
 
             CreateNodeView(node);
             EditorUtility.SetDirty(_actionRunner);
+        }
+        
+        /// <summary>
+        /// 런타임 업데이트 시작
+        /// </summary>
+        private void StartRuntimeUpdate()
+        {
+            if (!_isRuntimeUpdateActive)
+            {
+                EditorApplication.update += UpdateRuntimeHighlight;
+                _isRuntimeUpdateActive = true;
+            }
+        }
+        
+        /// <summary>
+        /// 런타임 업데이트 중단
+        /// </summary>
+        private void StopRuntimeUpdate()
+        {
+            if (_isRuntimeUpdateActive)
+            {
+                EditorApplication.update -= UpdateRuntimeHighlight;
+                _isRuntimeUpdateActive = false;
+                _lastExecutingNodeID = 0;
+                
+                // 모든 노드의 하이라이팅 제거
+                ClearAllRuntimeHighlights();
+            }
+        }
+        
+        /// <summary>
+        /// 런타임 하이라이팅 업데이트
+        /// </summary>
+        private void UpdateRuntimeHighlight()
+        {
+            if (_actionRunner == null || _action == null)
+                return;
+                
+            // 플레이 모드가 아니면 하이라이팅 제거
+            if (!Application.isPlaying)
+            {
+                if (_lastExecutingNodeID != 0)
+                {
+                    ClearAllRuntimeHighlights();
+                    _lastExecutingNodeID = 0;
+                }
+                return;
+            }
+            
+            // 현재 실행 중인 노드 ID 가져오기
+            int currentExecutingNodeID = _actionRunner.isRunning ? _actionRunner.currentNodeID : 0;
+            
+            // 이전과 다르면 하이라이팅 업데이트
+            if (currentExecutingNodeID != _lastExecutingNodeID)
+            {
+                // 이전 노드 하이라이팅 제거
+                if (_lastExecutingNodeID != 0)
+                {
+                    var lastNodeView = FindNodeView(_lastExecutingNodeID);
+                    lastNodeView?.SetRuntimeHighlight(false);
+                }
+                
+                // 새 노드 하이라이팅 적용
+                if (currentExecutingNodeID != 0)
+                {
+                    var currentNodeView = FindNodeView(currentExecutingNodeID);
+                    currentNodeView?.SetRuntimeHighlight(true);
+                }
+                
+                _lastExecutingNodeID = currentExecutingNodeID;
+            }
+        }
+        
+        /// <summary>
+        /// 모든 노드의 런타임 하이라이팅 제거
+        /// </summary>
+        private void ClearAllRuntimeHighlights()
+        {
+            foreach (var element in graphElements)
+            {
+                if (element is NodeView nodeView)
+                {
+                    nodeView.SetRuntimeHighlight(false);
+                }
+            }
         }
     }
 }

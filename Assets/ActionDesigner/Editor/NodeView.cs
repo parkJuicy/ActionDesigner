@@ -144,6 +144,24 @@ namespace ActionDesigner.Editor
             
             MarkDirtyRepaint();
         }
+        
+        /// <summary>
+        /// 런타임 하이라이팅 설정
+        /// </summary>
+        /// <param name="highlight">하이라이팅 여부</param>
+        public void SetRuntimeHighlight(bool highlight)
+        {
+            if (highlight)
+            {
+                AddToClassList("runtime-active");
+            }
+            else
+            {
+                RemoveFromClassList("runtime-active");
+            }
+            
+            MarkDirtyRepaint();
+        }
 
         public override void SetPosition(Rect newPos)
         {

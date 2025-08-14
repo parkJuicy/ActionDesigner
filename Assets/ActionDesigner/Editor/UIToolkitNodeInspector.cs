@@ -25,8 +25,6 @@ namespace ActionDesigner.Editor
         
         private ScrollView _scrollView;
         private VisualElement _contentContainer;
-        private Label _titleLabel;
-        private Label _typeLabel;
         
         // Motion/Condition 변경 이벤트
         public System.Action OnTaskChanged { get; set; }
@@ -41,31 +39,6 @@ namespace ActionDesigner.Editor
             // 기본 스타일 설정
             style.backgroundColor = new Color(0.22f, 0.22f, 0.22f, 1f);
             
-            // 제목 라벨
-            _titleLabel = new Label("Node Inspector");
-            _titleLabel.style.fontSize = 16;
-            _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            _titleLabel.style.color = Color.white;
-            _titleLabel.style.paddingTop = 8;
-            _titleLabel.style.paddingBottom = 4;
-            _titleLabel.style.paddingLeft = 10;
-            _titleLabel.style.paddingRight = 10;
-            _titleLabel.style.backgroundColor = new Color(0.27f, 0.27f, 0.27f, 1f);
-            Add(_titleLabel);
-            
-            // 타입 라벨
-            _typeLabel = new Label("");
-            _typeLabel.style.fontSize = 12;
-            _typeLabel.style.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-            _typeLabel.style.paddingTop = 0;
-            _typeLabel.style.paddingBottom = 8;
-            _typeLabel.style.paddingLeft = 10;
-            _typeLabel.style.paddingRight = 10;
-            _typeLabel.style.backgroundColor = new Color(0.27f, 0.27f, 0.27f, 1f);
-            _typeLabel.style.borderBottomWidth = 1;
-            _typeLabel.style.borderBottomColor = new Color(0.14f, 0.14f, 0.14f, 1f);
-            Add(_typeLabel);
-
             // 스크롤 뷰
             _scrollView = new ScrollView();
             _scrollView.style.flexGrow = 1;
@@ -133,26 +106,6 @@ namespace ActionDesigner.Editor
                 return;
             }
 
-            // 타이틀 업데이트
-            _titleLabel.text = $"{_currentNode.GetDisplayName()} Node";
-            
-            // 타입 정보 표시
-            if (_currentNode is MotionNode motionNode)
-            {
-                _typeLabel.text = $"Motion: {motionNode.motion?.GetType().Name}";
-                _typeLabel.style.color = new Color(1f, 0.4f, 0.4f, 1f); // 붉은 색조
-            }
-            else if (_currentNode is ConditionNode conditionNode)
-            {
-                _typeLabel.text = $"Condition: {conditionNode.condition?.GetType().Name}";
-                _typeLabel.style.color = new Color(0.4f, 0.7f, 1f, 1f); // 파란 색조
-            }
-            else
-            {
-                _typeLabel.text = "Unknown Type";
-                _typeLabel.style.color = Color.gray;
-            }
-
             // 노드의 속성들 표시
             CreateNodePropertyFields();
         }
@@ -201,7 +154,6 @@ namespace ActionDesigner.Editor
         private void ShowEmptyState()
         {
             _contentContainer.Clear();
-            _titleLabel.text = "Node Inspector";
 
             var emptyLabel = new Label("No node selected");
             emptyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -216,7 +168,6 @@ namespace ActionDesigner.Editor
         private void ShowError(string errorMessage)
         {
             _contentContainer.Clear();
-            _titleLabel.text = "Inspector Error";
 
             var errorLabel = new Label($"Error: {errorMessage}");
             errorLabel.style.color = Color.red;

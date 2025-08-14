@@ -106,3 +106,14 @@
     border-top-width: 2px;
     border-bottom-width: 2px;
 }
+
+.runtime-active #node-border {
+    border-left-color: rgb(255, 140, 140);
+    border-right-color: rgb(255, 140, 140);
+    border-top-color: rgb(255, 140, 140);
+    border-bottom-color: rgb(255, 140, 140);
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+}
