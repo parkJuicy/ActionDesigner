@@ -1,4 +1,5 @@
 using System;
+using ActionDesigner.Runtime;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,106 +8,92 @@ namespace ActionDesigner.Editor
 {
     public class NodeView : UnityEditor.Experimental.GraphView.Node
     {
-        private Runtime.Node _node;
+        private BaseNode _node;
         private Port input;
         private Port output;
         private bool _isRoot;
-        private string _lastTaskTypeName; // Task 타입 변경 감지용
 
-        public Runtime.Node Node { get => _node; }
+        public BaseNode Node { get => _node; }
         public Port Input { get => input; }
         public Port Output { get => output; }
         public Action<NodeView> OnNodeSelected { get; internal set; }
         public Action<int> OnNodeRootSet { get; internal set; }
+        public Action<NodeView> OnNodeTypeChanged { get; internal set; }
 
-        public NodeView(Runtime.Node node, bool isRoot) : base(UIToolkitPath.nodeViewUxml)
+        public NodeView(BaseNode node, bool isRoot) : base(UIToolkitPath.nodeViewUxml)
         {
             _node = node;
             _isRoot = isRoot;
             
-            UpdateTitle(); // 초기 타이틀 설정
+            UpdateTitle();
             viewDataKey = _node.id.ToString();
 
             InitNodeStyle();
-
-            if (!_isRoot)
-                CreateInputPorts();
-            CreateOutputPorts();
-            SetupClasses();
-            
-            // 주기적으로 Task 타입 변경 확인
-            schedule.Execute(() => CheckForTaskTypeChanges()).Every(100); // 100ms마다 확인
+            CreatePorts();
+            RefreshNodeClasses();
         }
         
         /// <summary>
-        /// 외부에서 호출할 수 있는 타이틀 업데이트 메서드
+        /// 개선된 타이틀 업데이트 - Node의 GetDisplayName() 활용
         /// </summary>
-        public void RefreshTitle()
+        public void UpdateTitle()
         {
-            UpdateTitle();
-        }
-        
-        /// <summary>
-        /// Task 타입에 따라 노드 타이틀 업데이트
-        /// </summary>
-        private void UpdateTitle()
-        {
-            string displayTitle = "Unknown";
+            string oldNodeType = DetermineNodeType();
             
-            if (_node.task != null)
-            {
-                // Task가 있으면 Task 타입명 사용
-                var taskType = _node.task.GetType();
-                displayTitle = UnityEditor.ObjectNames.NicifyVariableName(taskType.Name);
-                _lastTaskTypeName = taskType.Name;
-            }
-            else if (!string.IsNullOrEmpty(_node.type))
-            {
-                // Task가 없으면 노드의 기본 타입 사용
-                displayTitle = UnityEditor.ObjectNames.NicifyVariableName(_node.type);
-                _lastTaskTypeName = _node.type;
-            }
+            // 타이틀 설정
+            title = _node.GetDisplayName();
             
-            title = displayTitle;
-        }
-        
-        /// <summary>
-        /// Task 타입 변경 감지 및 타이틀 업데이트
-        /// </summary>
-        private void CheckForTaskTypeChanges()
-        {
-            if (_node?.task == null)
-            {
-                // Task가 null이 된 경우
-                if (_lastTaskTypeName != "None")
-                {
-                    _lastTaskTypeName = "None";
-                    UpdateTitle();
-                }
-                return;
-            }
+            string newNodeType = DetermineNodeType();
             
-            string currentTaskTypeName = _node.task.GetType().Name;
-            if (currentTaskTypeName != _lastTaskTypeName)
+            // 노드 타입이 변경된 경우 스타일 업데이트
+            if (newNodeType != oldNodeType)
             {
-                // Task 타입이 변경된 경우
-                UpdateTitle();
+                UpdateNodeStyle();
+                OnNodeTypeChanged?.Invoke(this);
             }
         }
 
+        /// <summary>
+        /// 노드의 타입 자동 감지
+        /// </summary>
+        private string DetermineNodeType()
+        {
+            return _node.GetNodeType();
+        }
+        
+        /// <summary>
+        /// 노드 스타일 업데이트
+        /// </summary>
+        private void UpdateNodeStyle()
+        {
+            RefreshNodeClasses();
+        }
+        
         private void InitNodeStyle()
         {
             style.left = _node.position.x;
             style.top = _node.position.y;
-            style.marginTop = 0;
-            style.marginBottom = 0;
-            style.marginLeft = 0;
-            style.marginRight = 0;
         }
 
-        private void CreateInputPorts()
+        /// <summary>
+        /// 포트 생성 로직 개선
+        /// </summary>
+        private void CreatePorts()
         {
-            if (_node.baseType == "Motion")
+            // Input 포트 (루트 노드가 아닌 경우만)
+            if (!_isRoot)
+            {
+                CreateInputPort();
+            }
+            
+            // Output 포트
+            CreateOutputPort();
+        }
+
+        private void CreateInputPort()
+        {
+            // Motion은 여러 부모 가능, Condition은 하나의 부모만 가능
+            if (_node is MotionNode)
                 input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi, typeof(bool));
             else
                 input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(bool));
@@ -117,12 +104,12 @@ namespace ActionDesigner.Editor
             inputContainer.Add(input);
         }
 
-        private void CreateOutputPorts()
+        private void CreateOutputPort()
         {
-            // Motion은 여러 개의 자식을 가질 수 있고, Transition은 하나만 가질 수 있음
-            if (_node.baseType == "Motion")
+            // Motion은 여러 자식 가능, Condition은 하나의 자식만 가능
+            if (_node is MotionNode)
                 output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Multi, typeof(bool));
-            else // Transition
+            else
                 output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Single, typeof(bool));
                 
             output.portName = "";
@@ -131,26 +118,36 @@ namespace ActionDesigner.Editor
             outputContainer.Add(output);
         }
 
-        private void SetupClasses()
+        /// <summary>
+        /// 개선된 CSS 클래스 관리
+        /// </summary>
+        private void RefreshNodeClasses()
         {
+            // 기존 클래스들 제거
+            RemoveFromClassList("root");
+            RemoveFromClassList("motion");
+            RemoveFromClassList("condition");
+            
+            // 새로운 클래스 추가
             if (_isRoot)
             {
                 AddToClassList("root");
             }
-            else if (_node.baseType == "Motion")
+            else if (_node is MotionNode)
             {
                 AddToClassList("motion");
             }
-            else if (_node.baseType == "Transition")
+            else if (_node is ConditionNode)
             {
-                AddToClassList("transition");
+                AddToClassList("condition");
             }
+            
+            MarkDirtyRepaint();
         }
 
         public override void SetPosition(Rect newPos)
         {
-            if (Application.isPlaying)
-                return;
+            if (Application.isPlaying) return;
 
             base.SetPosition(newPos);
             _node.position = newPos.position;
@@ -159,35 +156,13 @@ namespace ActionDesigner.Editor
         public override void OnSelected()
         {
             base.OnSelected();
-            if (OnNodeSelected != null)
-            {
-                OnNodeSelected.Invoke(this);
-            }
+            OnNodeSelected?.Invoke(this);
         }
-
-        internal void UpdateState()
-        {
-            //RemoveFromClassList("enable");
-            //RemoveFromClassList("disable");
-
-            //if (Application.isPlaying)
-            //{
-            //    switch (_node.Task.CurrentState)
-            //    {
-            //        case Task.State.Enable:
-            //            AddToClassList("enable");
-            //            break;
-            //        case Task.State.Disable:
-            //            AddToClassList("disable");
-            //            break;
-            //    }
-            //}
-        }
-
+        
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             // Motion만 루트 노드로 설정 가능
-            if (_node.baseType == "Motion")
+            if (_node is MotionNode motionNode && motionNode.IsValid)
             {
                 evt.menu.AppendAction("Set Root Node", (actionEvent) =>
                 {
@@ -196,17 +171,20 @@ namespace ActionDesigner.Editor
             }
             else
             {
-                evt.menu.AppendAction("Set Root Node", (actionEvent) =>
-                {
-                    // 아무것도 하지 않음
-                }, DropdownMenuAction.Status.Disabled);
-                
+                evt.menu.AppendAction("Set Root Node", null, DropdownMenuAction.Status.Disabled);
                 evt.menu.AppendSeparator();
-                evt.menu.AppendAction("(루트 노드는 Motion만 가능)", (actionEvent) =>
-                {
-                    // 정보 메시지
-                }, DropdownMenuAction.Status.Disabled);
+                evt.menu.AppendAction("(루트 노드는 Motion만 가능)", null, DropdownMenuAction.Status.Disabled);
             }
+            
+            // 디버그 정보
+            evt.menu.AppendSeparator();
+            evt.menu.AppendAction($"Node ID: {_node.id}", null, DropdownMenuAction.Status.Disabled);
+            evt.menu.AppendAction($"Type: {_node.GetNodeType()}", null, DropdownMenuAction.Status.Disabled);
+            
+            if (_node is MotionNode motion)
+                evt.menu.AppendAction($"Motion: {motion.motion?.GetType().Name}", null, DropdownMenuAction.Status.Disabled);
+            else if (_node is ConditionNode condition)
+                evt.menu.AppendAction($"Condition: {condition.condition?.GetType().Name}", null, DropdownMenuAction.Status.Disabled);
         }
     }
 }

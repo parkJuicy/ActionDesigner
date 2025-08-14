@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Motion = ActionDesigner.Runtime.Motion;
+using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
@@ -16,7 +18,7 @@ namespace ActionDesigner.Editor
     {
         [Obsolete("Obsolete")] public new class UxmlFactory : UxmlFactory<UIToolkitNodeInspector, UxmlTraits> { }
 
-        private Node _currentNode;
+        private BaseNode _currentNode;
         private ActionRunner _actionRunner;
         private SerializedObject _serializedObject;
         private SerializedProperty _nodeProperty;
@@ -24,8 +26,9 @@ namespace ActionDesigner.Editor
         private ScrollView _scrollView;
         private VisualElement _contentContainer;
         private Label _titleLabel;
+        private Label _typeLabel;
         
-        // Task 변경 이벤트
+        // Motion/Condition 변경 이벤트
         public System.Action OnTaskChanged { get; set; }
 
         public UIToolkitNodeInspector()
@@ -44,13 +47,24 @@ namespace ActionDesigner.Editor
             _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _titleLabel.style.color = Color.white;
             _titleLabel.style.paddingTop = 8;
-            _titleLabel.style.paddingBottom = 8;
+            _titleLabel.style.paddingBottom = 4;
             _titleLabel.style.paddingLeft = 10;
             _titleLabel.style.paddingRight = 10;
             _titleLabel.style.backgroundColor = new Color(0.27f, 0.27f, 0.27f, 1f);
-            _titleLabel.style.borderBottomWidth = 1;
-            _titleLabel.style.borderBottomColor = new Color(0.14f, 0.14f, 0.14f, 1f);
             Add(_titleLabel);
+            
+            // 타입 라벨
+            _typeLabel = new Label("");
+            _typeLabel.style.fontSize = 12;
+            _typeLabel.style.color = new Color(0.8f, 0.8f, 0.8f, 1f);
+            _typeLabel.style.paddingTop = 0;
+            _typeLabel.style.paddingBottom = 8;
+            _typeLabel.style.paddingLeft = 10;
+            _typeLabel.style.paddingRight = 10;
+            _typeLabel.style.backgroundColor = new Color(0.27f, 0.27f, 0.27f, 1f);
+            _typeLabel.style.borderBottomWidth = 1;
+            _typeLabel.style.borderBottomColor = new Color(0.14f, 0.14f, 0.14f, 1f);
+            Add(_typeLabel);
 
             // 스크롤 뷰
             _scrollView = new ScrollView();
@@ -90,7 +104,7 @@ namespace ActionDesigner.Editor
         {
             _serializedObject = new SerializedObject(_actionRunner);
             
-            // ActionRunner의 action.nodes에서 현재 노드의 인덱스 찾기
+            // ActionRunner의 _action.nodes에서 현재 노드의 인덱스 찾기
             var nodes = _actionRunner.action.nodes;
             int nodeIndex = -1;
             
@@ -120,10 +134,26 @@ namespace ActionDesigner.Editor
             }
 
             // 타이틀 업데이트
-            var nodeTypeName = Runtime.Action.GetOperationType(_currentNode.nameSpace, _currentNode.type)?.Name ?? "Unknown";
-            _titleLabel.text = $"{nodeTypeName} Node";
+            _titleLabel.text = $"{_currentNode.GetDisplayName()} Node";
+            
+            // 타입 정보 표시
+            if (_currentNode is MotionNode motionNode)
+            {
+                _typeLabel.text = $"Motion: {motionNode.motion?.GetType().Name}";
+                _typeLabel.style.color = new Color(1f, 0.4f, 0.4f, 1f); // 붉은 색조
+            }
+            else if (_currentNode is ConditionNode conditionNode)
+            {
+                _typeLabel.text = $"Condition: {conditionNode.condition?.GetType().Name}";
+                _typeLabel.style.color = new Color(0.4f, 0.7f, 1f, 1f); // 파란 색조
+            }
+            else
+            {
+                _typeLabel.text = "Unknown Type";
+                _typeLabel.style.color = Color.gray;
+            }
 
-            // 노드의 모든 프로퍼티를 표시
+            // 노드의 속성들 표시
             CreateNodePropertyFields();
         }
 
@@ -158,7 +188,7 @@ namespace ActionDesigner.Editor
             propertyField.TrackPropertyValue(property.Copy(), (prop) =>
             {
                 EditorUtility.SetDirty(_actionRunner);
-                // Task 변경 이벤트 발생
+                // Motion/Condition 변경 이벤트 발생
                 OnTaskChanged?.Invoke();
             });
             

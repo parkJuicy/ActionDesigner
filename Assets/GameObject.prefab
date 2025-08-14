@@ -54,13 +54,55 @@ MonoBehaviour:
     - rid: 8126778594069053522
       type: {class: Action, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
-        rootID: 0
+        rootID: 366074017
         nodes:
+        - type: MDefault
+          nameSpace: 
+          id: 366074017
+          position: {x: 263, y: 158}
+          childrenID: 6bfd1d3d
+          task:
+            rid: 8126778596324802560
+          baseType: Motion
         - type: TNewTask
           nameSpace: deep
-          id: -1524544453
-          position: {x: 310, y: 193}
-          childrenID: 
+          id: 1025375595
+          position: {x: 231, y: 336.76}
+          childrenID: 28906d40
           task:
-            rid: -2
+            rid: 8126778596324802561
           baseType: Transition
+        - type: MDefault
+          nameSpace: 
+          id: 1080922152
+          position: {x: 338, y: 522}
+          childrenID: a195d0d3
+          task:
+            rid: 8126778596324802562
+          baseType: Motion
+        - type: TNewTask
+          nameSpace: deep
+          id: -741304927
+          position: {x: 566, y: 520}
+          childrenID: 28906d40
+          task:
+            rid: 8126778596324802622
+          baseType: Transition
+    - rid: 8126778596324802560
+      type: {class: MDefault, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 8126778596324802561
+      type: {class: TNewTask, ns: deep, asm: Assembly-CSharp}
+      data:
+        animationClip: {fileID: 0}
+        parent:
+          rid: -2
+    - rid: 8126778596324802562
+      type: {class: MDefault, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 8126778596324802622
+      type: {class: TNewTask, ns: deep, asm: Assembly-CSharp}
+      data:
+        animationClip: {fileID: 0}
+        parent:
+          rid: -2

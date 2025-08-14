@@ -3,18 +3,32 @@ using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Motion = ActionDesigner.Runtime.Motion;
+using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
     public static class TaskTypeDebugger
     {
-        [MenuItem("Action Designer/Debug Task Types")]
-        public static void DebugTaskTypes()
+        [MenuItem("Action Designer/Debug Motion Types")]
+        public static void DebugMotionTypes()
         {
-            var baseType = typeof(Task);
+            var baseType = typeof(Motion);
+            DebugTypes("Motion", baseType);
+        }
+
+        [MenuItem("Action Designer/Debug Condition Types")]
+        public static void DebugConditionTypes()
+        {
+            var baseType = typeof(Condition);
+            DebugTypes("Condition", baseType);
+        }
+
+        private static void DebugTypes(string typeName, Type baseType)
+        {
             var foundTypes = new System.Collections.Generic.List<Type>();
 
-            Debug.Log("=== Task Type Debugging ===");
+            Debug.Log($"=== {typeName} Type Debugging ===");
             Debug.Log($"Base type: {baseType.FullName}");
 
             foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
@@ -23,10 +37,10 @@ namespace ActionDesigner.Editor
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        // Task를 상속받는 모든 타입 찾기
+                        // baseType을 상속받는 모든 타입 찾기
                         if (baseType.IsAssignableFrom(type) && type != baseType)
                         {
-                            Debug.Log($"Found type inheriting from Task: {type.FullName}");
+                            Debug.Log($"Found type inheriting from {typeName}: {type.FullName}");
                             Debug.Log($"  - IsAbstract: {type.IsAbstract}");
                             Debug.Log($"  - IsSerializable: {type.IsSerializable}");
                             Debug.Log($"  - IsPublic: {type.IsPublic}");
@@ -53,34 +67,53 @@ namespace ActionDesigner.Editor
                 }
             }
 
-            Debug.Log($"Total valid Task types found: {foundTypes.Count}");
+            Debug.Log($"Total valid {typeName} types found: {foundTypes.Count}");
             foreach (var type in foundTypes.OrderBy(t => t.Name))
             {
                 Debug.Log($"  ✓ {type.FullName}");
             }
         }
 
-        [MenuItem("Action Designer/Check TNewTask")]
-        public static void CheckTNewTask()
+        [MenuItem("Action Designer/Check Node Types")]
+        public static void CheckNodeTypes()
         {
-            var tNewTaskType = Type.GetType("deep.TNewTask");
-            if (tNewTaskType == null)
+            Debug.Log("=== Node Type Check ===");
+            
+            var motionType = typeof(Motion);
+            var conditionType = typeof(Condition);
+            
+            Debug.Log($"Motion type: {motionType.FullName}");
+            Debug.Log($"Condition type: {conditionType.FullName}");
+            
+            // Motion 하위 타입들 체크
+            var motionTypes = System.AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => {
+                    try { return assembly.GetTypes(); }
+                    catch { return new Type[0]; }
+                })
+                .Where(type => motionType.IsAssignableFrom(type) && !type.IsAbstract)
+                .ToArray();
+                
+            Debug.Log($"Found {motionTypes.Length} Motion types:");
+            foreach (var type in motionTypes)
             {
-                Debug.LogError("TNewTask type not found! Make sure it's compiled properly.");
-                return;
+                Debug.Log($"  - {type.FullName}");
             }
-
-            Debug.Log($"TNewTask found: {tNewTaskType.FullName}");
-            Debug.Log($"  - Base type: {tNewTaskType.BaseType?.FullName}");
-            Debug.Log($"  - IsAbstract: {tNewTaskType.IsAbstract}");
-            Debug.Log($"  - IsSerializable: {tNewTaskType.IsSerializable}");
-            Debug.Log($"  - IsPublic: {tNewTaskType.IsPublic}");
-
-            var taskType = typeof(Task);
-            Debug.Log($"  - Is assignable from Task: {taskType.IsAssignableFrom(tNewTaskType)}");
-
-            var transitionType = typeof(Transition);
-            Debug.Log($"  - Is assignable from Transition: {transitionType.IsAssignableFrom(tNewTaskType)}");
+            
+            // Condition 하위 타입들 체크
+            var conditionTypes = System.AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => {
+                    try { return assembly.GetTypes(); }
+                    catch { return new Type[0]; }
+                })
+                .Where(type => conditionType.IsAssignableFrom(type) && !type.IsAbstract)
+                .ToArray();
+                
+            Debug.Log($"Found {conditionTypes.Length} Condition types:");
+            foreach (var type in conditionTypes)
+            {
+                Debug.Log($"  - {type.FullName}");
+            }
         }
     }
 }

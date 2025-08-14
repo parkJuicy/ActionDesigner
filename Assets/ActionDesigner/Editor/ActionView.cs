@@ -8,6 +8,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Motion = ActionDesigner.Runtime.Motion;
+using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
@@ -41,11 +42,110 @@ namespace ActionDesigner.Editor
             {
                 if (element is NodeView nodeView)
                 {
-                    nodeView.RefreshTitle();
+                    nodeView.UpdateTitle();
                 }
+            }
+            
+            // 노드 타입 변경 후 잘못된 연결 제거
+            ValidateAndCleanConnections();
+        }
+        
+        /// <summary>
+        /// 잘못된 연결들을 검사하고 제거
+        /// </summary>
+        private void ValidateAndCleanConnections()
+        {
+            if (_action == null) return;
+            
+            var invalidConnections = new List<(BaseNode parent, BaseNode child)>();
+            
+            // 모든 연결 검사
+            foreach (var node in _action.nodes)
+            {
+                for (int i = node.childrenID.Count - 1; i >= 0; i--)
+                {
+                    var childID = node.childrenID[i];
+                    var childNode = _action.nodes.Find(n => n.id == childID);
+                    
+                    if (childNode == null)
+                    {
+                        // 자식 노드가 없음
+                        node.childrenID.RemoveAt(i);
+                        continue;
+                    }
+                    
+                    // 연결 규칙 검증
+                    if (!IsValidConnection(node, childNode))
+                    {
+                        invalidConnections.Add((node, childNode));
+                    }
+                }
+            }
+            
+            // 잘못된 연결 제거
+            foreach (var (parent, child) in invalidConnections)
+            {
+                RemoveConnection(parent, child);
+                Debug.LogWarning($"잘못된 연결 제거: {parent.GetDisplayName()} -> {child.GetDisplayName()}");
+            }
+            
+            if (invalidConnections.Count > 0)
+            {
+                // UI 새로고침
+                RefreshGraphView();
+                EditorUtility.SetDirty(_actionRunner);
             }
         }
 
+        /// <summary>
+        /// 연결이 유효한지 검증 (개선된 단일 메서드)
+        /// </summary>
+        private bool IsValidConnection(BaseNode parent, BaseNode child)
+        {
+            // 노드가 유효하지 않으면 연결 불가
+            if (parent == null || child == null) return false;
+            
+            bool parentIsMotion = parent is MotionNode motionParent && motionParent.IsValid;
+            bool parentIsCondition = parent is ConditionNode conditionParent && conditionParent.IsValid;
+            bool childIsMotion = child is MotionNode motionChild && motionChild.IsValid;
+            bool childIsCondition = child is ConditionNode conditionChild && conditionChild.IsValid;
+            
+            if (!parentIsMotion && !parentIsCondition) return false;
+            if (!childIsMotion && !childIsCondition) return false;
+            
+            // Motion → Condition만 허용
+            if (parentIsMotion && !childIsCondition) return false;
+            
+            // Condition → Motion만 허용  
+            if (parentIsCondition && !childIsMotion) return false;
+            
+            // Condition은 하나의 자식만 가능 (체인 구조)
+            if (parentIsCondition && parent.childrenID.Count >= 1) return false;
+            
+            return true;
+        }
+
+        /// <summary>
+        /// 연결 제거
+        /// </summary>
+        private void RemoveConnection(BaseNode parent, BaseNode child)
+        {
+            _action.RemoveChild(parent, child);
+        }
+        
+        /// <summary>
+        /// 그래프 뷰 전체 새로고침
+        /// </summary>
+        private void RefreshGraphView()
+        {
+            graphViewChanged -= OnGraphViewChanged;
+            DeleteElements(graphElements.ToList());
+            graphViewChanged += OnGraphViewChanged;
+            
+            DrawNode();
+            DrawEdge();
+        }
+        
         internal void ShowView(ActionRunner actionRunner)
         {
             _actionRunner = actionRunner;
@@ -80,8 +180,11 @@ namespace ActionDesigner.Editor
                     NodeView parentView = FindNodeView(node.id);
                     NodeView childView = FindNodeView(childID);
 
-                    Edge edge = parentView.Output.ConnectTo(childView.Input);
-                    AddElement(edge);
+                    if (parentView != null && childView != null)
+                    {
+                        Edge edge = parentView.Output.ConnectTo(childView.Input);
+                        AddElement(edge);
+                    }
                 });
             });
         }
@@ -91,37 +194,24 @@ namespace ActionDesigner.Editor
             return GetNodeByGuid(nodeID.ToString()) as NodeView;
         }
 
-        void CreateNodeView(Runtime.Node node)
+        void CreateNodeView(BaseNode node)
         {
             NodeView nodeView = new NodeView(node, node.id == _action.rootID)
             {
                 OnNodeSelected = OnNodeSelected,
-                OnNodeRootSet = OnNodeRootSet
+                OnNodeRootSet = OnNodeRootSet,
+                OnNodeTypeChanged = OnNodeTypeChanged
             };
             AddElement(nodeView);
         }
         
-        private bool ValidateConnection(Runtime.Node parent, Runtime.Node child)
+        /// <summary>
+        /// 노드 타입 변경 시 호출되는 이벤트 핸들러
+        /// </summary>
+        void OnNodeTypeChanged(NodeView nodeView)
         {
-            // Motion은 Transition과만 연결 가능
-            if (parent.task is Motion && !(child.task is Transition))
-            {
-                return false;
-            }
-            
-            // Transition은 Motion과만 연결 가능
-            if (parent.task is Transition && !(child.task is Motion))
-            {
-                return false;
-            }
-            
-            // Transition은 하나의 자식만 가질 수 있음
-            if (parent.task is Transition && parent.childrenID.Count >= 1)
-            {
-                return false;
-            }
-            
-            return true;
+            // 즉시 연결 검증 및 정리
+            ValidateAndCleanConnections();
         }
         
         GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
@@ -161,29 +251,15 @@ namespace ActionDesigner.Editor
                     NodeView childView = edge.input.node as NodeView;
                     
                     // 연결 규칙 검증
-                    if (ValidateConnection(parentView.Node, childView.Node))
+                    if (IsValidConnection(parentView.Node, childView.Node))
                     {
                         _action.AddChild(parentView.Node, childView.Node);
                         validEdges.Add(edge);
                     }
                     else
                     {
-                        // 잘못된 연결인 경우 경고 메시지
-                        string parentType = parentView.Node.task.GetType().Name;
-                        string childType = childView.Node.task.GetType().Name;
-                        
-                        if (parentView.Node.task is Motion && !(childView.Node.task is Transition))
-                        {
-                            Debug.LogWarning($"Motion은 Transition과만 연결할 수 있습니다: {parentType} -> {childType}");
-                        }
-                        else if (parentView.Node.task is Transition && !(childView.Node.task is Motion))
-                        {
-                            Debug.LogWarning($"Transition은 Motion과만 연결할 수 있습니다: {parentType} -> {childType}");
-                        }
-                        else if (parentView.Node.task is Transition && parentView.Node.childrenID.Count >= 1)
-                        {
-                            Debug.LogWarning($"Transition은 하나의 자식만 가질 수 있습니다: {parentType}");
-                        }
+                        // 개선된 에러 메시지
+                        ShowConnectionError(parentView.Node, childView.Node);
                         
                         // 잘못된 연결 제거
                         edge.output.Disconnect(edge);
@@ -200,15 +276,14 @@ namespace ActionDesigner.Editor
                 graphViewChange.movedElements.ForEach((node) =>
                 {
                     NodeView nodeView = node as NodeView;
-                    if (nodeView.Input != null && nodeView.Input.connections != null)
+                    if (nodeView?.Input?.connections != null)
                     {
                         foreach (var parentEdge in nodeView.Input.connections)
                         {
-                            if (parentEdge == null)
-                                break;
+                            if (parentEdge == null) break;
 
                             var parent = parentEdge.output.node as NodeView;
-                            parent.Node.childrenID.Sort(SortByHoriziontalPosition);
+                            parent?.Node?.childrenID.Sort(SortByHoriziontalPosition);
                         }
                     }
                 });
@@ -218,9 +293,45 @@ namespace ActionDesigner.Editor
             return graphViewChange;
         }
 
+        /// <summary>
+        /// 개선된 연결 에러 메시지
+        /// </summary>
+        private void ShowConnectionError(BaseNode parent, BaseNode child)
+        {
+            string parentName = parent.GetDisplayName();
+            string childName = child.GetDisplayName();
+            
+            bool parentIsMotion = parent is MotionNode;
+            bool parentIsCondition = parent is ConditionNode;
+            bool childIsMotion = child is MotionNode;
+            bool childIsCondition = child is ConditionNode;
+            
+            if (parentIsMotion && childIsMotion)
+            {
+                Debug.LogWarning($"Motion끼리는 연결할 수 없습니다. Motion 뒤에는 Condition이 와야 합니다: {parentName} -> {childName}");
+            }
+            else if (parentIsCondition && childIsCondition)
+            {
+                Debug.LogWarning($"Condition끼리는 연결할 수 없습니다. Condition 뒤에는 Motion이 와야 합니다: {parentName} -> {childName}");
+            }
+            else if (parentIsCondition && parent.childrenID.Count >= 1)
+            {
+                Debug.LogWarning($"Condition은 하나의 자식만 가질 수 있습니다 (체인 구조): {parentName}");
+            }
+            else
+            {
+                Debug.LogWarning($"유효하지 않은 연결입니다: {parentName} -> {childName}");
+            }
+        }
+
         int SortByHoriziontalPosition(int left, int right)
         {
-            return FindNodeView(left).Node.position.x < FindNodeView(right).Node.position.x ? -1 : 1;
+            var leftNode = FindNodeView(left)?.Node;
+            var rightNode = FindNodeView(right)?.Node;
+            
+            if (leftNode == null || rightNode == null) return 0;
+            
+            return leftNode.position.x < rightNode.position.x ? -1 : 1;
         }
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -229,11 +340,14 @@ namespace ActionDesigner.Editor
                 return;
 
             evt.menu.AppendSeparator();
-            ShowNodeTypes<Motion>(evt);
-            ShowNodeTypes<Transition>(evt);
+            evt.menu.AppendAction("Motion/", null, DropdownMenuAction.Status.Disabled);
+            ShowNodeTypes<Motion>(evt, "Motion");
+            evt.menu.AppendSeparator();
+            evt.menu.AppendAction("Condition/", null, DropdownMenuAction.Status.Disabled);
+            ShowNodeTypes<Condition>(evt, "Condition");
         }
 
-        void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt) where T : Task
+        void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt, string baseType) where T : class
         {
             VisualElement contentViewContainer = ElementAt(1);
             Vector3 screenMousePosition = evt.localMousePosition;
@@ -243,18 +357,20 @@ namespace ActionDesigner.Editor
             var types = TypeCache.GetTypesDerivedFrom<T>();
             foreach (var type in types)
             {
+                if (type.IsAbstract) continue;
+
                 string menu;
-                if (type.Namespace == null)
-                    menu = $"{type.BaseType.Name}/{type.Name}";
+                if (string.IsNullOrEmpty(type.Namespace))
+                    menu = $"{baseType}/{type.Name}";
                 else
-                    menu = $"{type.BaseType.Name}/{type.Namespace}/{type.Name}";
+                    menu = $"{baseType}/{type.Namespace.Replace("ActionDesigner.Runtime.", "")}/{type.Name}";
 
                 evt.menu.AppendAction(menu, (actionEvent) =>
                 {
-                    Runtime.Node node = _action.CreateNode(type.Name, type.Namespace, type.BaseType.Name, worldMousePosition);
+                    BaseNode node = _action.CreateNode(type.Name, type.Namespace, baseType, worldMousePosition);
                     
                     // 루트 노드는 Motion만 가능
-                    if (_action.rootID == 0 && typeof(T) == typeof(Motion))
+                    if (_action.rootID == 0 && baseType == "Motion")
                         _action.rootID = node.id;
 
                     CreateNodeView(node);
@@ -290,7 +406,7 @@ namespace ActionDesigner.Editor
                 // Output 포트에서 시작하는 경우 (상위 -> 하위 연결)
                 if (startPort.direction == Direction.Output)
                 {
-                    if (ValidateConnection(startNodeView.Node, endNodeView.Node))
+                    if (IsValidConnection(startNodeView.Node, endNodeView.Node))
                     {
                         compatiblePorts.Add(port);
                     }
@@ -298,7 +414,7 @@ namespace ActionDesigner.Editor
                 // Input 포트에서 시작하는 경우 (하위 -> 상위 연결)
                 else
                 {
-                    if (ValidateConnection(endNodeView.Node, startNodeView.Node))
+                    if (IsValidConnection(endNodeView.Node, startNodeView.Node))
                     {
                         compatiblePorts.Add(port);
                     }
@@ -310,7 +426,18 @@ namespace ActionDesigner.Editor
         
         void OnNodeRootSet(int newRootNodeID)
         {
+            var newRootNode = _action.FindNode(newRootNodeID);
+            
+            // 루트 노드는 Motion만 가능
+            if (newRootNode == null || !(newRootNode is MotionNode motionNode) || !motionNode.IsValid)
+            {
+                Debug.LogWarning("루트 노드는 Motion만 설정할 수 있습니다.");
+                return;
+            }
+            
             _action.rootID = newRootNodeID;
+            
+            // 새 루트 노드를 부모로 가진 연결들 제거
             _action.nodes.ForEach(node => DisconnectRootParentEdge(node, newRootNodeID));
             
             graphViewChanged -= OnGraphViewChanged;
@@ -321,7 +448,7 @@ namespace ActionDesigner.Editor
             DrawEdge();
         }
 
-        void DisconnectRootParentEdge(Runtime.Node node, int newRootNodeID)
+        void DisconnectRootParentEdge(BaseNode node, int newRootNodeID)
         {
             if (node.childrenID.Contains(newRootNodeID))
                 node.childrenID.Remove(newRootNodeID);

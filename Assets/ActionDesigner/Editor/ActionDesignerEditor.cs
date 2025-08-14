@@ -37,14 +37,7 @@ namespace ActionDesigner.Editor
 
             _actionView = root.Q<ActionView>();
             
-            // 기존 InspectorView를 UIToolkitNodeInspector로 교체
             var leftPanel = root.Q<VisualElement>("left-panel");
-            var oldInspector = leftPanel.Query<VisualElement>().Where(e => e.GetType().Name.Contains("Inspector")).First();
-            if (oldInspector != null)
-            {
-                leftPanel.Remove(oldInspector);
-            }
-            
             _nodeInspector = new UIToolkitNodeInspector();
             _nodeInspector.style.flexGrow = 1;
             _nodeInspector.OnTaskChanged = () => {
@@ -80,18 +73,6 @@ namespace ActionDesigner.Editor
             _actionNameLabel.text = null;
             _actionView?.ClearView();
             _nodeInspector?.Clear();
-        }
-
-        void OnInspectorUpdate()
-        {
-            if (_actionRunner == null)
-                return;
-                
-            // NodeView 타이틀 새로고침 (0.5초마다)
-            if (EditorApplication.timeSinceStartup % 0.5f < 0.1f)
-            {
-                _actionView?.RefreshAllNodeTitles();
-            }
         }
     }
 }

@@ -54,7 +54,7 @@
     background-color: rgb(254, 95, 85);
 }
 
-.transition #input {
+.condition #input {
     background-color: rgb(83, 134, 228);
 }
 

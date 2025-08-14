@@ -211,66 +211,123 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &8915972787170906191
-PrefabInstance:
+--- !u!1 &1484965528
+GameObject:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1484965530}
+  - component: {fileID: 1484965529}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1484965529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484965528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f2e3bc5eb800384c8a3005686887e17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _action:
+    rid: 8126778838887956559
+  _autoStart: 1
+  _loop: 1
+  _currentNodeID: 0
+  _isRunning: 0
+  _currentState: Idle
+  _motionProgress: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8126778838887956559
+      type: {class: Action, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        rootID: 1993628964
+        nodes:
+        - rid: 8126778838887956560
+        - rid: 8126778838887956562
+        - rid: 8126778838887956564
+    - rid: 8126778838887956560
+      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: DebugLogTask
+        nameSpace: ActionDesigner.Runtime.Tasks
+        id: 1993628964
+        position: {x: 247, y: 147}
+        childrenID: df1f19ba
+        motion:
+          rid: 8126778838887956561
+    - rid: 8126778838887956561
+      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
+      data:
+        message: Hello World!
+        useCustomColor: 0
+        logColor: {r: 1, g: 1, b: 1, a: 1}
+        delay: 0
+        includeTimestamp: 1
+    - rid: 8126778838887956562
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: KeyPressCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: -1172758561
+        position: {x: 138, y: 291}
+        childrenID: 8ebb6fb6
+        condition:
+          rid: 8126778838887956563
+    - rid: 8126778838887956563
+      type: {class: KeyPressCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data:
+        keyCode: 32
+        requireKeyDown: 1
+    - rid: 8126778838887956564
+      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: DebugLogTask
+        nameSpace: ActionDesigner.Runtime.Tasks
+        id: -1234191474
+        position: {x: 167, y: 445}
+        childrenID: 
+        motion:
+          rid: 8126778838887956565
+    - rid: 8126778838887956565
+      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
+      data:
+        message: 222
+        useCustomColor: 0
+        logColor: {r: 1, g: 1, b: 1, a: 1}
+        delay: 0
+        includeTimestamp: 1
+--- !u!4 &1484965530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484965528}
   serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849831291707232592, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3211005095611485446, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
-      propertyPath: m_Name
-      value: GameObject
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 08f612f1f7caf514b9148b1dd029dc2f, type: 3}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.015442241, y: 1.0277873, z: 0.3477502}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1461306002}
-  - {fileID: 8915972787170906191}
+  - {fileID: 1484965530}

@@ -3,34 +3,60 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Motion = ActionDesigner.Runtime.Motion;
+using Condition = ActionDesigner.Runtime.Condition;
 
 namespace ActionDesigner.Editor
 {
     /// <summary>
-    /// Task 타입을 위한 PropertyDrawer - SerializeReferenceExtensions 기반
+    /// Motion 타입을 위한 PropertyDrawer
     /// </summary>
-    [CustomPropertyDrawer(typeof(Task), true)]
-    public class TaskPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(Motion), true)]
+    public class MotionPropertyDrawer : PropertyDrawer
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            // PropertyField를 사용하되, Task 타입에는 SubclassSelectorAttribute가 적용되어
-            // SerializeReferenceExtensions의 예쁜 UI가 자동으로 사용됨
             var propertyField = new PropertyField(property);
             
-            // 라벨 개선
             if (!string.IsNullOrEmpty(property.displayName))
             {
                 propertyField.label = property.displayName;
             }
             
-            // 스타일 적용
             propertyField.style.marginBottom = 2;
-            
             return propertyField;
         }
 
-        // IMGUI 폴백 - SerializeReferenceExtensions가 자동으로 처리
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.PropertyField(position, property, label, true);
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return EditorGUI.GetPropertyHeight(property, label, true);
+        }
+    }
+    
+    /// <summary>
+    /// Condition 타입을 위한 PropertyDrawer
+    /// </summary>
+    [CustomPropertyDrawer(typeof(Condition), true)]
+    public class ConditionPropertyDrawer : PropertyDrawer
+    {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            var propertyField = new PropertyField(property);
+            
+            if (!string.IsNullOrEmpty(property.displayName))
+            {
+                propertyField.label = property.displayName;
+            }
+            
+            propertyField.style.marginBottom = 2;
+            return propertyField;
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.PropertyField(position, property, label, true);
