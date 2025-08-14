@@ -17,6 +17,7 @@ namespace ActionDesigner.Editor
         [Obsolete("Obsolete")] public new class UxmlFactory : UxmlFactory<ActionView, UxmlTraits> { }
         ActionRunner _actionRunner;
         Runtime.Action _action;
+        Vector2 _lastMousePosition;
 
         public Action<NodeView> OnNodeSelected { get; internal set; }
 
@@ -31,6 +32,12 @@ namespace ActionDesigner.Editor
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIToolkitPath.ussPath);
             styleSheets.Add(styleSheet);
+            
+            // 마우스 위치 추적
+            RegisterCallback<MouseMoveEvent>(OnMouseMove);
+            
+            // 키보드 이벤트 포커스 가능하도록 설정
+            focusable = true;
         }
         
         /// <summary>
@@ -336,47 +343,8 @@ namespace ActionDesigner.Editor
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
-            if (_action == null || Application.isPlaying)
-                return;
-
-            evt.menu.AppendSeparator();
-            evt.menu.AppendAction("Motion/", null, DropdownMenuAction.Status.Disabled);
-            ShowNodeTypes<Motion>(evt, "Motion");
-            evt.menu.AppendSeparator();
-            evt.menu.AppendAction("Condition/", null, DropdownMenuAction.Status.Disabled);
-            ShowNodeTypes<Condition>(evt, "Condition");
-        }
-
-        void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt, string baseType) where T : class
-        {
-            VisualElement contentViewContainer = ElementAt(1);
-            Vector3 screenMousePosition = evt.localMousePosition;
-            Vector2 worldMousePosition = screenMousePosition - contentViewContainer.transform.position;
-            worldMousePosition *= 1 / contentViewContainer.transform.scale.x;
-
-            var types = TypeCache.GetTypesDerivedFrom<T>();
-            foreach (var type in types)
-            {
-                if (type.IsAbstract) continue;
-
-                string menu;
-                if (string.IsNullOrEmpty(type.Namespace))
-                    menu = $"{baseType}/{type.Name}";
-                else
-                    menu = $"{baseType}/{type.Namespace.Replace("ActionDesigner.Runtime.", "")}/{type.Name}";
-
-                evt.menu.AppendAction(menu, (actionEvent) =>
-                {
-                    BaseNode node = _action.CreateNode(type.Name, type.Namespace, baseType, worldMousePosition);
-                    
-                    // 루트 노드는 Motion만 가능
-                    if (_action.rootID == 0 && baseType == "Motion")
-                        _action.rootID = node.id;
-
-                    CreateNodeView(node);
-                    EditorUtility.SetDirty(_actionRunner);
-                });
-            }
+            // 우클릭 노드 생성 메뉴 제거 - 스페이스바 검색 사용
+            // 기본 그래프뷰 메뉴만 유지 (복사, 붙여넣기 등)
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -452,6 +420,72 @@ namespace ActionDesigner.Editor
         {
             if (node.childrenID.Contains(newRootNodeID))
                 node.childrenID.Remove(newRootNodeID);
+        }
+        
+        /// <summary>
+        /// 마우스 위치 추적
+        /// </summary>
+        private void OnMouseMove(MouseMoveEvent evt)
+        {
+            _lastMousePosition = evt.localMousePosition;
+        }
+        
+        /// <summary>
+        /// 키보드 이벤트 처리
+        /// </summary>
+        protected override void ExecuteDefaultActionAtTarget(EventBase evt)
+        {
+            base.ExecuteDefaultActionAtTarget(evt);
+            
+            if (evt is KeyDownEvent keyDownEvent)
+            {
+                // 스페이스바 감지
+                if (keyDownEvent.keyCode == KeyCode.Space && !keyDownEvent.ctrlKey && !keyDownEvent.shiftKey && !keyDownEvent.altKey)
+                {
+                    if (_action != null && !Application.isPlaying)
+                    {
+                        OpenNodeSearchWindow();
+                        evt.StopPropagation();
+                        evt.PreventDefault();
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 노드 검색 창 열기
+        /// </summary>
+        private void OpenNodeSearchWindow()
+        {
+            // 마우스 위치를 월드 좌표로 변환
+            VisualElement contentViewContainer = ElementAt(1);
+            Vector2 worldMousePosition = _lastMousePosition - (Vector2)contentViewContainer.transform.position;
+            worldMousePosition *= 1 / contentViewContainer.transform.scale.x;
+            
+            NodeSearchWindow.Open(this, _lastMousePosition);
+        }
+        
+        /// <summary>
+        /// 지정된 위치에 노드 생성 (NodeSearchWindow에서 호출)
+        /// </summary>
+        public void CreateNodeAtPosition(Type nodeType, string baseType, Vector2 screenPosition)
+        {
+            if (_action == null || Application.isPlaying)
+                return;
+                
+            // 스크린 좌표를 월드 좌표로 변환
+            VisualElement contentViewContainer = ElementAt(1);
+            Vector2 worldMousePosition = screenPosition - (Vector2)contentViewContainer.transform.position;
+            worldMousePosition *= 1 / contentViewContainer.transform.scale.x;
+            
+            BaseNode node = _action.CreateNode(nodeType.Name, nodeType.Namespace, baseType, worldMousePosition);
+            
+            // 루트 노드는 Motion만 가능
+            if (_action.rootID == 0 && baseType == "Motion")
+                _action.rootID = node.id;
+
+            CreateNodeView(node);
+            EditorUtility.SetDirty(_actionRunner);
         }
     }
 }

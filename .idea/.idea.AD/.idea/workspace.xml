@@ -4,54 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="42cdf4f3-a35f-4073-b08a-92646750210e" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.AD/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AD/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/123.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/123.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionDesignerEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionDesignerEditor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskPropertyDrawer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskPropertyDrawer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskTypeDebugger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/TaskTypeDebugger.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkit/NodeViewStyle.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkit/NodeViewStyle.uss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkitNodeInspector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/UIToolkitNodeInspector.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Motion.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Motion.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Node.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Node.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Task.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Task.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/MoveTransformTask.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/MoveTransformTask.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Transition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Transition.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/GameObject.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/GameObject.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Editor.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Editor/InputSystemEditor.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Editor/InputSystemEditor.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputKey.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputKey.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputManager.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputManager.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputNames.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputNames.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputSetting.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/InputSetting.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/README.md.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Util.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Util/EnumMapper.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/InputSystem/Util/EnumMapper.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/MDefault.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/MDefault.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/TNewTask.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/TNewTask.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/SceneTemplateSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/SceneTemplateSettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-6000.dwlt" afterDir="false" />
-    </list>
+    <list default="true" id="42cdf4f3-a35f-4073-b08a-92646750210e" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
