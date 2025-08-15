@@ -5,8 +5,8 @@ namespace ActionDesigner.Runtime
     /// </summary>
     public interface IMotion
     {
-        public void Start();
-        
+        public void Start() { }
+
         public bool Update(float deltaTime);
         
         public void End() { }

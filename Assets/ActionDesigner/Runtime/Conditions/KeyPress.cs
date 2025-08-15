@@ -3,13 +3,10 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Conditions
 {
     [System.Serializable]
-    public class KeyPressCondition : ICondition
+    public class KeyPress : ICondition
     {
-        [SerializeField]
-        public KeyCode keyCode = KeyCode.Space;
-        
-        [SerializeField]
-        public bool requireKeyDown = true;
+        [SerializeField] KeyCode keyCode = KeyCode.Space;
+        [SerializeField] bool requireKeyDown = true;
 
         public bool Evaluate(float deltaTime)
         {
@@ -21,11 +18,6 @@ namespace ActionDesigner.Runtime.Conditions
             {
                 return Input.GetKey(keyCode);
             }
-        }
-        
-        public void OnSuccess()
-        {
-            Debug.Log($"KEY OnSuccess - {keyCode} 키로 인한 전환!");
         }
     }
 }
