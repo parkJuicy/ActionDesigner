@@ -7,7 +7,7 @@ namespace ActionDesigner.Runtime
     {
         public void Start();
         
-        public bool Update();
+        public bool Update(float deltaTime);
         
         public void End() { }
 

@@ -413,21 +413,16 @@ namespace ActionDesigner.Editor
             
             _action.rootID = newRootNodeID;
             
-            // 새 루트 노드를 부모로 가진 연결들 제거
-            _action.nodes.ForEach(node => DisconnectRootParentEdge(node, newRootNodeID));
+            // 루트 노드도 input을 가질 수 있으므로 연결 제거 로직 삭제
+            // 기존: _action.nodes.ForEach(node => DisconnectRootParentEdge(node, newRootNodeID));
             
+            // UI 새로고침
             graphViewChanged -= OnGraphViewChanged;
             DeleteElements(graphElements.ToList());
             graphViewChanged += OnGraphViewChanged;
             
             DrawNode();
             DrawEdge();
-        }
-
-        void DisconnectRootParentEdge(BaseNode node, int newRootNodeID)
-        {
-            if (node.childrenID.Contains(newRootNodeID))
-                node.childrenID.Remove(newRootNodeID);
         }
         
         /// <summary>
@@ -441,6 +436,7 @@ namespace ActionDesigner.Editor
         /// <summary>
         /// 키보드 이벤트 처리
         /// </summary>
+        [Obsolete("ExecuteDefaultActionAtTarget override has been removed because default event handling was migrated to HandleEventBubbleUp. Please use HandleEventBubbleUp.", false)]
         protected override void ExecuteDefaultActionAtTarget(EventBase evt)
         {
             base.ExecuteDefaultActionAtTarget(evt);

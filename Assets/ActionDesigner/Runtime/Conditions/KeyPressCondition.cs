@@ -11,7 +11,7 @@ namespace ActionDesigner.Runtime.Conditions
         [SerializeField]
         public bool requireKeyDown = true;
 
-        public bool Evaluate()
+        public bool Evaluate(float deltaTime)
         {
             if (requireKeyDown)
             {

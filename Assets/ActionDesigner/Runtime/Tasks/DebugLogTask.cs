@@ -20,7 +20,7 @@ namespace ActionDesigner.Runtime.Tasks
             _startTime = Time.time;
         }
 
-        public bool Update()
+        public bool Update(float deltaTime)
         {
             if (_executed) return true;
 

@@ -240,38 +240,111 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f2e3bc5eb800384c8a3005686887e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _action:
-    rid: 8126778838887956819
-  _autoStart: 1
-  _currentNodeID: 0
-  _isRunning: 0
-  _currentState: 0
+  action:
+    rid: 8126778845811441664
+  autoStart: 1
   references:
     version: 2
     RefIds:
-    - rid: 8126778838887956819
+    - rid: 8126778845811441664
       type: {class: Action, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
-        rootID: 960866580
+        rootID: -448473712
         nodes:
-        - rid: 8126778838887956820
-    - rid: 8126778838887956820
+        - rid: 8126778845811441665
+        - rid: 8126778845811441756
+        - rid: 8126778845811441758
+        - rid: 8126778845811441760
+        - rid: 8126778845811441764
+        - rid: 8126778855407747163
+    - rid: 8126778845811441665
       type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
         type: WaitTask
         nameSpace: ActionDesigner.Runtime.Tasks
-        id: 960866580
-        position: {x: 210, y: 227}
-        childrenID: 
+        id: -448473712
+        position: {x: 256, y: 194}
+        childrenID: 834b3c8babece745
         motion:
-          rid: 8126778838887956821
-    - rid: 8126778838887956821
+          rid: 8126778845811441666
+    - rid: 8126778845811441666
       type: {class: WaitTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
       data:
-        waitTime: 1
+        waitTime: 5
         useUnscaledTime: 0
         randomizeTime: 0
         randomTimeRange: {x: 0.5, y: 2}
+    - rid: 8126778845811441756
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: EndCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: 1172827307
+        position: {x: 150, y: 349}
+        childrenID: a8fd27ca
+        condition:
+          rid: 8126778845811441757
+    - rid: 8126778845811441757
+      type: {class: EndCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data: 
+    - rid: 8126778845811441758
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: KeyPressCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: -1958982781
+        position: {x: 372, y: 355}
+        childrenID: 37af9e5c
+        condition:
+          rid: 8126778845811441759
+    - rid: 8126778845811441759
+      type: {class: KeyPressCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data:
+        keyCode: 32
+        requireKeyDown: 1
+    - rid: 8126778845811441760
+      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: DebugLogTask
+        nameSpace: ActionDesigner.Runtime.Tasks
+        id: -903348824
+        position: {x: 147.68001, y: 474}
+        childrenID: 
+        motion:
+          rid: 8126778845811441761
+    - rid: 8126778845811441761
+      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
+      data:
+        message: 11
+        delay: 0
+    - rid: 8126778845811441764
+      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: DebugLogTask
+        nameSpace: ActionDesigner.Runtime.Tasks
+        id: 1553903415
+        position: {x: 371, y: 480}
+        childrenID: c53ab269
+        motion:
+          rid: 8126778845811441765
+    - rid: 8126778845811441765
+      type: {class: DebugLogTask, ns: ActionDesigner.Runtime.Tasks, asm: Assembly-CSharp}
+      data:
+        message: 22
+        delay: 0
+    - rid: 8126778855407747163
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: EndCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: 1773288133
+        position: {x: 605.35626, y: 411.49994}
+        childrenID: 90d544e5
+        condition:
+          rid: 8126778855407747164
+    - rid: 8126778855407747164
+      type: {class: EndCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data: 
 --- !u!4 &1484965530
 Transform:
   m_ObjectHideFlags: 0

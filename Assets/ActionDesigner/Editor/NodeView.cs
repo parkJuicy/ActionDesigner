@@ -33,19 +33,13 @@ namespace ActionDesigner.Editor
             RefreshNodeClasses();
         }
         
-        /// <summary>
-        /// 개선된 타이틀 업데이트 - Node의 GetDisplayName() 활용
-        /// </summary>
         public void UpdateTitle()
         {
             string oldNodeType = DetermineNodeType();
             
-            // 타이틀 설정
             title = _node.GetDisplayName();
-            
             string newNodeType = DetermineNodeType();
             
-            // 노드 타입이 변경된 경우 스타일 업데이트
             if (newNodeType != oldNodeType)
             {
                 UpdateNodeStyle();
@@ -53,17 +47,11 @@ namespace ActionDesigner.Editor
             }
         }
 
-        /// <summary>
-        /// 노드의 타입 자동 감지
-        /// </summary>
         private string DetermineNodeType()
         {
             return _node.GetNodeType();
         }
         
-        /// <summary>
-        /// 노드 스타일 업데이트
-        /// </summary>
         private void UpdateNodeStyle()
         {
             RefreshNodeClasses();
@@ -75,18 +63,9 @@ namespace ActionDesigner.Editor
             style.top = _node.position.y;
         }
 
-        /// <summary>
-        /// 포트 생성 로직 개선
-        /// </summary>
         private void CreatePorts()
         {
-            // Input 포트 (루트 노드가 아닌 경우만)
-            if (!_isRoot)
-            {
-                CreateInputPort();
-            }
-            
-            // Output 포트
+            CreateInputPort();
             CreateOutputPort();
         }
 
@@ -118,9 +97,6 @@ namespace ActionDesigner.Editor
             outputContainer.Add(output);
         }
 
-        /// <summary>
-        /// 개선된 CSS 클래스 관리
-        /// </summary>
         private void RefreshNodeClasses()
         {
             // 기존 클래스들 제거
@@ -145,10 +121,6 @@ namespace ActionDesigner.Editor
             MarkDirtyRepaint();
         }
         
-        /// <summary>
-        /// 런타임 하이라이팅 설정
-        /// </summary>
-        /// <param name="highlight">하이라이팅 여부</param>
         public void SetRuntimeHighlight(bool highlight)
         {
             if (highlight)

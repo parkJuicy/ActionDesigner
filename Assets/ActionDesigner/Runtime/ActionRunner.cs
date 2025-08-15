@@ -78,17 +78,18 @@ namespace ActionDesigner.Runtime
             if (currentState != ActionRunnerState.Running || currentNode == null)
                 return;
 
+            float deltaTime = Time.deltaTime;
             if (currentNode is MotionNode motionNode)
             {
-                UpdateMotionWithTransitions(motionNode);
+                UpdateMotionWithTransitions(motionNode, deltaTime);
             }
         }
 
-        void UpdateMotionWithTransitions(MotionNode motionNode)
+        void UpdateMotionWithTransitions(MotionNode motionNode, float deltaTime)
         {
             if (motionNode?.motion == null) return;
-            isMotionCompleted = motionNode.motion.Update();
-            BaseNode nextNode = EvaluateTransitions(motionNode);
+            isMotionCompleted = motionNode.motion.Update(deltaTime);
+            BaseNode nextNode = EvaluateTransitions(motionNode, deltaTime);
 
             if (nextNode == null || isMotionCompleted && motionNode.childrenID.Count == 0)
             {
@@ -107,7 +108,7 @@ namespace ActionDesigner.Runtime
             }
         }
 
-        BaseNode EvaluateTransitions(MotionNode motionNode)
+        BaseNode EvaluateTransitions(MotionNode motionNode, float deltaTime)
         {
             if (motionNode.childrenID.Count == 0) return null;
 
@@ -119,7 +120,7 @@ namespace ActionDesigner.Runtime
                 bool conditionSuccess = isMotionCompleted;
                 if (conditionNode.condition is not EndCondition)
                 {
-                    conditionSuccess = conditionNode.condition.Evaluate();
+                    conditionSuccess = conditionNode.condition.Evaluate(deltaTime);
                 }
 
                 if (conditionSuccess)

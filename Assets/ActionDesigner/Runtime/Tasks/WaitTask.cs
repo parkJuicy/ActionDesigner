@@ -22,7 +22,6 @@ namespace ActionDesigner.Runtime.Tasks
 
         public void Start()
         {
-            Debug.Log("웨이트 스타또");
             _startTime = useUnscaledTime ? Time.unscaledTime : Time.time;
             
             if (randomizeTime)
@@ -35,7 +34,7 @@ namespace ActionDesigner.Runtime.Tasks
             }
         }
 
-        public bool Update()
+        public bool Update(float deltaTime)
         {
             float currentTime = useUnscaledTime ? Time.unscaledTime : Time.time;
             float elapsedTime = currentTime - _startTime;
