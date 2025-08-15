@@ -40,6 +40,12 @@ namespace ActionDesigner.Editor
             
             // 키보드 이벤트 포커스 가능하도록 설정
             focusable = true;
+            
+            // 그리드 스냅 설정 (정확한 정렬을 위해)
+            this.StretchToParentSize();
+            
+            // 더 정밀한 위치 제어를 위한 설정
+            this.style.position = Position.Relative;
         }
         
         /// <summary>

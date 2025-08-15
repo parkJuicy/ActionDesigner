@@ -8,6 +8,9 @@
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
+    /* 정확한 위치를 위한 설정 */
+    margin: 0;
+    padding: 0;
 }
 
 #input {
@@ -83,6 +86,10 @@
 
 .node {
     min-width: 150px;
+    /* 정확한 정렬을 위한 설정 */
+    margin: 0;
+    padding: 0;
+    position: relative;
 }
 
 .node:hover {

@@ -66,8 +66,16 @@ namespace ActionDesigner.Editor
         
         private void InitNodeStyle()
         {
-            style.left = _node.position.x;
-            style.top = _node.position.y;
+            // 좌표를 정수로 따림 (초기 설정 시에도)
+            style.left = Mathf.Round(_node.position.x);
+            style.top = Mathf.Round(_node.position.y);
+            
+            // 위치 정확성을 위한 추가 설정
+            style.position = Position.Absolute;
+            style.marginLeft = 0;
+            style.marginTop = 0;
+            style.marginRight = 0;
+            style.marginBottom = 0;
         }
 
         private void CreatePorts()
@@ -146,8 +154,18 @@ namespace ActionDesigner.Editor
         {
             if (Application.isPlaying) return;
 
-            base.SetPosition(newPos);
-            _node.position = newPos.position;
+            // 좌표를 정수로 따림 (픽셀 완벽 정렬)
+            var roundedPos = new Rect(
+                Mathf.Round(newPos.x),
+                Mathf.Round(newPos.y),
+                newPos.width,
+                newPos.height
+            );
+            
+            base.SetPosition(roundedPos);
+            
+            // BaseNode에도 정확한 좌표 저장
+            _node.position = new Vector2(roundedPos.x, roundedPos.y);
         }
 
         public override void OnSelected()
