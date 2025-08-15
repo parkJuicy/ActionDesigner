@@ -20,6 +20,7 @@ namespace ActionDesigner.Runtime
         public Vector2 position;
         [HideInInspector]
         public List<int> childrenID = new List<int>();
+        public string title;
 
         /// <summary>
         /// 노드의 표시 이름 반환

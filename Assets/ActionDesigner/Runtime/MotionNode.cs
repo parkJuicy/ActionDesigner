@@ -14,7 +14,11 @@ namespace ActionDesigner.Runtime
 
         public override string GetDisplayName()
         {
-            if (motion != null)
+            if (!string.IsNullOrEmpty(title))
+            {
+                return title;
+            }
+            else if (motion != null)
             {
                 return UnityEditor.ObjectNames.NicifyVariableName(motion.GetType().Name);
             }
