@@ -252,42 +252,30 @@ MonoBehaviour:
         rootID: 449087453
         nodes:
         - rid: 8126778855407747290
-        - rid: 8126778855407747292
         - rid: 8126778855407747294
+        - rid: 8126778855407747308
+        - rid: 8126778855407747310
+        - rid: 8126778855407747312
     - rid: 8126778855407747290
       type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
         type: WaitTask
         nameSpace: ActionDesigner.Runtime.Tasks
         id: 449087453
-        position: {x: 231, y: 124}
-        childrenID: fa5fe5dc
-        title: 123
+        position: {x: 236, y: 132}
+        childrenID: 7199bc614d4b8ffe
+        title: "\uC548\uB155"
         motion:
           rid: 8126778855407747305
-    - rid: 8126778855407747292
-      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
-      data:
-        type: EndCondition
-        nameSpace: ActionDesigner.Runtime.Conditions
-        id: -588947462
-        position: {x: 223, y: 258}
-        childrenID: 15ae0d78
-        title: 
-        condition:
-          rid: 8126778855407747293
-    - rid: 8126778855407747293
-      type: {class: EndCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
-      data: 
     - rid: 8126778855407747294
       type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
         type: DebugLogTask
         nameSpace: ActionDesigner.Runtime.Tasks
         id: 2014162453
-        position: {x: 231, y: 408}
+        position: {x: 110, y: 415.36}
         childrenID: 
-        title: 
+        title: 333
         motion:
           rid: 8126778855407747298
     - rid: 8126778855407747298
@@ -308,6 +296,49 @@ MonoBehaviour:
       type: {class: DebugLogTask, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
       data:
         message: 1
+    - rid: 8126778855407747308
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: EndCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: 1639750001
+        position: {x: 289, y: 256.72}
+        childrenID: 3fcaf139
+        title: "\uBC18\uAC81"
+        condition:
+          rid: 8126778855407747309
+    - rid: 8126778855407747309
+      type: {class: EndCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data: 
+    - rid: 8126778855407747310
+      type: {class: ConditionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: EndCondition
+        nameSpace: ActionDesigner.Runtime.Conditions
+        id: -24163507
+        position: {x: 89, y: 265}
+        childrenID: 15ae0d78
+        title: 
+        condition:
+          rid: 8126778855407747311
+    - rid: 8126778855407747311
+      type: {class: EndCondition, ns: ActionDesigner.Runtime.Conditions, asm: Assembly-CSharp}
+      data: 
+    - rid: 8126778855407747312
+      type: {class: MotionNode, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        type: WaitTask
+        nameSpace: ActionDesigner.Runtime
+        id: 972147263
+        position: {x: 340, y: 423}
+        childrenID: 
+        title: 
+        motion:
+          rid: 8126778855407747313
+    - rid: 8126778855407747313
+      type: {class: WaitTask, ns: ActionDesigner.Runtime, asm: Assembly-CSharp}
+      data:
+        waitTime: 1
 --- !u!4 &1488505188
 Transform:
   m_ObjectHideFlags: 0

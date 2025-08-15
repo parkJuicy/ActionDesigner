@@ -107,9 +107,17 @@ namespace ActionDesigner.Editor
         }
 
         /// <summary>
-        /// 연결이 유효한지 검증 (개선된 단일 메서드)
+        /// 연결이 유효한지 검증 (기존 연결 검증용)
         /// </summary>
         private bool IsValidConnection(BaseNode parent, BaseNode child)
+        {
+            return IsValidConnection(parent, child, true);
+        }
+        
+        /// <summary>
+        /// 연결이 유효한지 검증 (개선된 단일 메서드)
+        /// </summary>
+        private bool IsValidConnection(BaseNode parent, BaseNode child, bool isExistingConnection = false)
         {
             // 노드가 유효하지 않으면 연결 불가
             if (parent == null || child == null) return false;
@@ -129,7 +137,19 @@ namespace ActionDesigner.Editor
             if (parentIsCondition && !childIsMotion) return false;
             
             // Condition은 하나의 자식만 가능 (체인 구조)
-            if (parentIsCondition && parent.childrenID.Count >= 1) return false;
+            // 단, 기존 연결 검증 시에는 현재 검사 중인 연결은 제외
+            if (parentIsCondition && !isExistingConnection && parent.childrenID.Count >= 1) 
+            {
+                return false;
+            }
+            
+            // 기존 연결 검증 시: 현재 child가 이미 parent의 자식에 포함되어 있다면 유효
+            if (isExistingConnection && parentIsCondition && parent.childrenID.Contains(child.id))
+            {
+                // 다른 자식이 있는지 확인 (현재 child 제외)
+                int otherChildrenCount = parent.childrenID.Count(id => id != child.id);
+                if (otherChildrenCount > 0) return false; // 다른 자식이 있으면 무효
+            }
             
             return true;
         }
@@ -140,6 +160,69 @@ namespace ActionDesigner.Editor
         private void RemoveConnection(BaseNode parent, BaseNode child)
         {
             _action.RemoveChild(parent, child);
+        }
+        
+        /// <summary>
+        /// 더 안전한 연결 검증 및 정리 (전체 새로고침 없이)
+        /// </summary>
+        private void ValidateAndCleanConnectionsSafely()
+        {
+            if (_action == null) return;
+            
+            var invalidConnections = new List<(BaseNode parent, BaseNode child)>();
+            
+            // 모든 연결 검사
+            foreach (var node in _action.nodes)
+            {
+                for (int i = node.childrenID.Count - 1; i >= 0; i--)
+                {
+                    var childID = node.childrenID[i];
+                    var childNode = _action.nodes.Find(n => n.id == childID);
+                    
+                    if (childNode == null)
+                    {
+                        // 자식 노드가 없음
+                        node.childrenID.RemoveAt(i);
+                        continue;
+                    }
+                    
+                    // 연결 규칙 검증
+                    if (!IsValidConnection(node, childNode))
+                    {
+                        invalidConnections.Add((node, childNode));
+                    }
+                }
+            }
+            
+            // 잘못된 연결 제거
+            foreach (var (parent, child) in invalidConnections)
+            {
+                RemoveConnection(parent, child);
+                Debug.LogWarning($"잘못된 연결 제거: {parent.GetDisplayName()} -> {child.GetDisplayName()}");
+            }
+            
+            if (invalidConnections.Count > 0)
+            {
+                // 전체 새로고침 대신 Edge만 업데이트
+                UpdateEdgesOnly();
+                EditorUtility.SetDirty(_actionRunner);
+            }
+        }
+        
+        /// <summary>
+        /// 노드는 그대로 두고 Edge만 업데이트
+        /// </summary>
+        private void UpdateEdgesOnly()
+        {
+            // 기존 Edge들만 제거
+            var edgesToRemove = graphElements.ToList().OfType<Edge>().ToList();
+            foreach (var edge in edgesToRemove)
+            {
+                RemoveElement(edge);
+            }
+            
+            // Edge 다시 생성
+            DrawEdge();
         }
         
         /// <summary>
@@ -225,8 +308,8 @@ namespace ActionDesigner.Editor
         /// </summary>
         void OnNodeTypeChanged(NodeView nodeView)
         {
-            // 즉시 연결 검증 및 정리
-            ValidateAndCleanConnections();
+            // 즉시 연결 검증 및 정리 (더 안전하게)
+            ValidateAndCleanConnectionsSafely();
         }
         
         GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
@@ -266,7 +349,7 @@ namespace ActionDesigner.Editor
                     NodeView childView = edge.input.node as NodeView;
                     
                     // 연결 규칙 검증
-                    if (IsValidConnection(parentView.Node, childView.Node))
+                    if (IsValidConnection(parentView.Node, childView.Node, false)) // 새 연결이므로 false
                     {
                         _action.AddChild(parentView.Node, childView.Node);
                         validEdges.Add(edge);
@@ -382,7 +465,7 @@ namespace ActionDesigner.Editor
                 // Output 포트에서 시작하는 경우 (상위 -> 하위 연결)
                 if (startPort.direction == Direction.Output)
                 {
-                    if (IsValidConnection(startNodeView.Node, endNodeView.Node))
+                    if (IsValidConnection(startNodeView.Node, endNodeView.Node, false)) // 새 연결
                     {
                         compatiblePorts.Add(port);
                     }
@@ -390,7 +473,7 @@ namespace ActionDesigner.Editor
                 // Input 포트에서 시작하는 경우 (하위 -> 상위 연결)
                 else
                 {
-                    if (IsValidConnection(endNodeView.Node, startNodeView.Node))
+                    if (IsValidConnection(endNodeView.Node, startNodeView.Node, false)) // 새 연결
                     {
                         compatiblePorts.Add(port);
                     }

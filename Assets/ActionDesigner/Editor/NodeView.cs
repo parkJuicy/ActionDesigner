@@ -36,14 +36,21 @@ namespace ActionDesigner.Editor
         public void UpdateTitle()
         {
             string oldNodeType = DetermineNodeType();
+            string oldTitle = title;
             
-            title = _node.GetDisplayName();
+            // 타이틀 설정
+            string newTitle = _node.GetDisplayName();
+            title = newTitle;
+            
             string newNodeType = DetermineNodeType();
-            
             if (newNodeType != oldNodeType)
             {
                 UpdateNodeStyle();
                 OnNodeTypeChanged?.Invoke(this);
+            }
+            else if (oldTitle != newTitle)
+            {
+                UpdateNodeStyle();
             }
         }
 
