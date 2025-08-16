@@ -131,7 +131,7 @@ namespace ActionDesigner.Editor
             propertyField.TrackPropertyValue(property.Copy(), (prop) =>
             {
                 EditorUtility.SetDirty(_actionRunner);
-                // Motion/Condition 변경 이벤트 발생
+                // Behavior/Condition 변경 이벤트 발생
                 OnTaskChanged?.Invoke();
             });
             

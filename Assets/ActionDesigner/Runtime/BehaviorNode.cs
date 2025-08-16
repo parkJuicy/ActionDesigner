@@ -4,13 +4,13 @@ using UnityEngine;
 namespace ActionDesigner.Runtime
 {
     /// <summary>
-    /// Motion을 담는 노드 - type/namespace 기반으로 Motion 객체 생성
+    /// Behavior을 담는 노드 - type/namespace 기반으로 Behavior 객체 생성
     /// </summary>
     [Serializable]
-    public class MotionNode : BaseNode
+    public class BehaviorNode : BaseNode
     {
         [SerializeReference, SubclassSelector]
-        public IMotion motion;
+        public IBehavior behavior;
 
         public override string GetDisplayName()
         {
@@ -18,20 +18,20 @@ namespace ActionDesigner.Runtime
             {
                 return title;
             }
-            else if (motion != null)
+            else if (behavior != null)
             {
-                return UnityEditor.ObjectNames.NicifyVariableName(motion.GetType().Name);
+                return UnityEditor.ObjectNames.NicifyVariableName(behavior.GetType().Name);
             }
             else if (!string.IsNullOrEmpty(type))
             {
                 return UnityEditor.ObjectNames.NicifyVariableName(type);
             }
-            return "Empty Motion";
+            return "Empty Behavior";
         }
 
         public override string GetNodeType()
         {
-            return "Motion";
+            return "Behavior";
         }
 
         public override bool CanAddChild()
@@ -41,7 +41,7 @@ namespace ActionDesigner.Runtime
 
         public override object GetNodeObject()
         {
-            return motion;
+            return behavior;
         }
 
         public override void CreateNodeObject()
@@ -49,12 +49,12 @@ namespace ActionDesigner.Runtime
             if (string.IsNullOrEmpty(type)) return;
 
             var operationType = Action.GetOperationType(nameSpace, type);
-            if (operationType != null && typeof(IMotion).IsAssignableFrom(operationType))
+            if (operationType != null && typeof(IBehavior).IsAssignableFrom(operationType))
             {
-                motion = Activator.CreateInstance(operationType) as IMotion;
+                behavior = Activator.CreateInstance(operationType) as IBehavior;
             }
         }
         
-        public bool IsValid => motion != null;
+        public bool IsValid => behavior != null;
     }
 }

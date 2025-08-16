@@ -4,54 +4,54 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Decorators
 {
     [Serializable]
-    public sealed class Sequencer : IMotion
+    public sealed class Sequencer : IBehavior
     {
-        [SerializeReference, SubclassSelector] IMotion[] motions;
+        [SerializeReference, SubclassSelector] IBehavior[] behaviors;
         int currentIndex;
 
         public void Start()
         {
             currentIndex = 0;
-            if (motions.Length > 0)
-                motions[currentIndex].Start();
+            if (behaviors.Length > 0)
+                behaviors[currentIndex].Start();
         }
 
         public bool Update(float deltaTime)
         {
-            if (currentIndex >= motions.Length)
+            if (currentIndex >= behaviors.Length)
             {
                 return true;
             }
-            var currentMotion = motions[currentIndex];
-            var success = currentMotion.Update(deltaTime);
+            var currentBehavior = behaviors[currentIndex];
+            var success = currentBehavior.Update(deltaTime);
             while (success)
             {
-                motions[currentIndex].End();
+                behaviors[currentIndex].End();
                 currentIndex++;
-                if (currentIndex >= motions.Length)
+                if (currentIndex >= behaviors.Length)
                 {
                     return true;
                 }
                 
-                motions[currentIndex].Start();
-                success = motions[currentIndex].Update(deltaTime);
+                behaviors[currentIndex].Start();
+                success = behaviors[currentIndex].Update(deltaTime);
             }
             return false;
         }
 
         public void End()
         {
-            for(int i = currentIndex; i < motions.Length; i++)
+            for(int i = currentIndex; i < behaviors.Length; i++)
             {
-                motions[i].End();
+                behaviors[i].End();
             }
         }
 
         public void Stop()
         {
-            foreach (var motion in motions)
+            foreach (var behavior in behaviors)
             {
-                motion.Stop();
+                behavior.Stop();
             }
         }
     }

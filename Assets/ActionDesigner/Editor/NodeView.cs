@@ -86,8 +86,8 @@ namespace ActionDesigner.Editor
 
         private void CreateInputPort()
         {
-            // Motion은 여러 부모 가능, Condition은 하나의 부모만 가능
-            if (_node is MotionNode)
+            // Behavior은 여러 부모 가능, Condition은 하나의 부모만 가능
+            if (_node is BehaviorNode)
                 input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Multi, typeof(bool));
             else
                 input = InstantiatePort(Orientation.Vertical, Direction.Input, Port.Capacity.Single, typeof(bool));
@@ -100,8 +100,8 @@ namespace ActionDesigner.Editor
 
         private void CreateOutputPort()
         {
-            // Motion은 여러 자식 가능, Condition은 하나의 자식만 가능
-            if (_node is MotionNode)
+            // Behavior은 여러 자식 가능, Condition은 하나의 자식만 가능
+            if (_node is BehaviorNode)
                 output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Multi, typeof(bool));
             else
                 output = InstantiatePort(Orientation.Vertical, Direction.Output, Port.Capacity.Single, typeof(bool));
@@ -116,7 +116,7 @@ namespace ActionDesigner.Editor
         {
             // 기존 클래스들 제거
             RemoveFromClassList("root");
-            RemoveFromClassList("motion");
+            RemoveFromClassList("behavior");
             RemoveFromClassList("condition");
             
             // 새로운 클래스 추가
@@ -124,9 +124,9 @@ namespace ActionDesigner.Editor
             {
                 AddToClassList("root");
             }
-            else if (_node is MotionNode)
+            else if (_node is BehaviorNode)
             {
-                AddToClassList("motion");
+                AddToClassList("behavior");
             }
             else if (_node is ConditionNode)
             {
@@ -176,8 +176,8 @@ namespace ActionDesigner.Editor
         
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
-            // Motion만 루트 노드로 설정 가능
-            if (_node is MotionNode motionNode && motionNode.IsValid)
+            // Behavior만 루트 노드로 설정 가능
+            if (_node is BehaviorNode behaviorNode && behaviorNode.IsValid)
             {
                 evt.menu.AppendAction("Set Root Node", (actionEvent) =>
                 {
@@ -188,7 +188,7 @@ namespace ActionDesigner.Editor
             {
                 evt.menu.AppendAction("Set Root Node", null, DropdownMenuAction.Status.Disabled);
                 evt.menu.AppendSeparator();
-                evt.menu.AppendAction("(루트 노드는 Motion만 가능)", null, DropdownMenuAction.Status.Disabled);
+                evt.menu.AppendAction("(루트 노드는 Behavior만 가능)", null, DropdownMenuAction.Status.Disabled);
             }
             
             // 디버그 정보
@@ -196,8 +196,8 @@ namespace ActionDesigner.Editor
             evt.menu.AppendAction($"Node ID: {_node.id}", null, DropdownMenuAction.Status.Disabled);
             evt.menu.AppendAction($"Type: {_node.GetNodeType()}", null, DropdownMenuAction.Status.Disabled);
             
-            if (_node is MotionNode motion)
-                evt.menu.AppendAction($"Motion: {motion.motion?.GetType().Name}", null, DropdownMenuAction.Status.Disabled);
+            if (_node is BehaviorNode behavior)
+                evt.menu.AppendAction($"Behavior: {behavior.behavior?.GetType().Name}", null, DropdownMenuAction.Status.Disabled);
             else if (_node is ConditionNode condition)
                 evt.menu.AppendAction($"Condition: {condition.condition?.GetType().Name}", null, DropdownMenuAction.Status.Disabled);
         }

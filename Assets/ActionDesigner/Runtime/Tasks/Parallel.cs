@@ -5,35 +5,35 @@ using UnityEngine;
 namespace ActionDesigner.Runtime.Decorators
 {
     [Serializable]
-    public sealed class Parallel : IMotion
+    public sealed class Parallel : IBehavior
     {
-        [SerializeReference, SubclassSelector] IMotion[] motions;
+        [SerializeReference, SubclassSelector] IBehavior[] behaviors;
         HashSet<int> completedIndex = new HashSet<int>();
 
         public void Start()
         {
             completedIndex.Clear();
-            foreach (var motion in motions)
+            foreach (var behavior in behaviors)
             {
-                motion.Start();
+                behavior.Start();
             }
         }
 
         public bool Update(float deltaTime)
         {
-            if (motions.Length == completedIndex.Count)
+            if (behaviors.Length == completedIndex.Count)
                 return true;
 
-            for (int i = 0; i < motions.Length; i++)
+            for (int i = 0; i < behaviors.Length; i++)
             {
                 if (completedIndex.Contains(i))
                     continue;
 
-                var motion = motions[i];
-                var success = motion.Update(deltaTime);
+                var behavior = behaviors[i];
+                var success = behavior.Update(deltaTime);
                 if (success)
                 {
-                    motion.End();
+                    behavior.End();
                     completedIndex.Add(i);
                 }
             }
@@ -42,20 +42,20 @@ namespace ActionDesigner.Runtime.Decorators
 
         public void End()
         {
-            for (int i = 0; i < motions.Length; i++)
+            for (int i = 0; i < behaviors.Length; i++)
             {
                 if (completedIndex.Contains(i))
                     continue;
                 
-                motions[i].End();
+                behaviors[i].End();
             }
         }
 
         public void Stop()
         {
-            foreach (var motion in motions)
+            foreach (var behavior in behaviors)
             {
-                motion.Stop();
+                behavior.Stop();
             }
         }
     }

@@ -31,8 +31,8 @@ namespace ActionDesigner.Editor
                 new SearchTreeGroupEntry(new GUIContent("Create Node"), 0),
             };
 
-            // Motion 노드들 추가
-            AddMotionNodes(tree);
+            // Behavior 노드들 추가
+            AddBehaviorNodes(tree);
             
             // Condition 노드들 추가  
             AddConditionNodes(tree);
@@ -40,15 +40,15 @@ namespace ActionDesigner.Editor
             return tree;
         }
 
-        private void AddMotionNodes(List<SearchTreeEntry> tree)
+        private void AddBehaviorNodes(List<SearchTreeEntry> tree)
         {
-            tree.Add(new SearchTreeGroupEntry(new GUIContent("Motion"), 1));
+            tree.Add(new SearchTreeGroupEntry(new GUIContent("Behavior"), 1));
 
-            var motionTypes = TypeCache.GetTypesDerivedFrom<IMotion>();
+            var behaviorTypes = TypeCache.GetTypesDerivedFrom<IBehavior>();
             var namespaceGroups = new Dictionary<string, List<Type>>();
 
             // Namespace별로 그룹화
-            foreach (var type in motionTypes)
+            foreach (var type in behaviorTypes)
             {
                 if (type.IsAbstract) continue;
 
@@ -75,7 +75,7 @@ namespace ActionDesigner.Editor
                             userData = new NodeCreationData
                             {
                                 Type = type,
-                                BaseType = "Motion"
+                                BaseType = "Behavior"
                             }
                         });
                     }
@@ -91,7 +91,7 @@ namespace ActionDesigner.Editor
                         userData = new NodeCreationData
                         {
                             Type = type,
-                            BaseType = "Motion"
+                            BaseType = "Behavior"
                         }
                     });
                 }

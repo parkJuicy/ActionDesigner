@@ -3,7 +3,7 @@ using UnityEngine;
 namespace ActionDesigner.Runtime
 {
     [System.Serializable]
-    public sealed class WaitTask : IMotion
+    public sealed class WaitTask : IBehavior
     {
         [SerializeField] float waitTime = 1.0f;
         float elapsedTime;

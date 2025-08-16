@@ -128,19 +128,19 @@ namespace ActionDesigner.Editor
             // 노드가 유효하지 않으면 연결 불가
             if (parent == null || child == null) return false;
             
-            bool parentIsMotion = parent is MotionNode motionParent && motionParent.IsValid;
+            bool parentIsBehavior = parent is BehaviorNode behaviorParent && behaviorParent.IsValid;
             bool parentIsCondition = parent is ConditionNode conditionParent && conditionParent.IsValid;
-            bool childIsMotion = child is MotionNode motionChild && motionChild.IsValid;
+            bool childIsBehavior = child is BehaviorNode behaviorChild && behaviorChild.IsValid;
             bool childIsCondition = child is ConditionNode conditionChild && conditionChild.IsValid;
             
-            if (!parentIsMotion && !parentIsCondition) return false;
-            if (!childIsMotion && !childIsCondition) return false;
+            if (!parentIsBehavior && !parentIsCondition) return false;
+            if (!childIsBehavior && !childIsCondition) return false;
             
-            // Motion → Condition만 허용
-            if (parentIsMotion && !childIsCondition) return false;
+            // Behavior → Condition만 허용
+            if (parentIsBehavior && !childIsCondition) return false;
             
-            // Condition → Motion만 허용  
-            if (parentIsCondition && !childIsMotion) return false;
+            // Condition → Behavior만 허용  
+            if (parentIsCondition && !childIsBehavior) return false;
             
             // Condition은 하나의 자식만 가능 (체인 구조)
             // 단, 기존 연결 검증 시에는 현재 검사 중인 연결은 제외
@@ -405,18 +405,18 @@ namespace ActionDesigner.Editor
             string parentName = parent.GetDisplayName();
             string childName = child.GetDisplayName();
             
-            bool parentIsMotion = parent is MotionNode;
+            bool parentIsBehavior = parent is BehaviorNode;
             bool parentIsCondition = parent is ConditionNode;
-            bool childIsMotion = child is MotionNode;
+            bool childIsBehavior = child is BehaviorNode;
             bool childIsCondition = child is ConditionNode;
             
-            if (parentIsMotion && childIsMotion)
+            if (parentIsBehavior && childIsBehavior)
             {
-                Debug.LogWarning($"Motion끼리는 연결할 수 없습니다. Motion 뒤에는 Condition이 와야 합니다: {parentName} -> {childName}");
+                Debug.LogWarning($"Behavior끼리는 연결할 수 없습니다. Behavior 뒤에는 Condition이 와야 합니다: {parentName} -> {childName}");
             }
             else if (parentIsCondition && childIsCondition)
             {
-                Debug.LogWarning($"Condition끼리는 연결할 수 없습니다. Condition 뒤에는 Motion이 와야 합니다: {parentName} -> {childName}");
+                Debug.LogWarning($"Condition끼리는 연결할 수 없습니다. Condition 뒤에는 Behavior이 와야 합니다: {parentName} -> {childName}");
             }
             else if (parentIsCondition && parent.childrenID.Count >= 1)
             {
@@ -493,10 +493,10 @@ namespace ActionDesigner.Editor
         {
             var newRootNode = _action.FindNode(newRootNodeID);
             
-            // 루트 노드는 Motion만 가능
-            if (newRootNode == null || !(newRootNode is MotionNode motionNode) || !motionNode.IsValid)
+            // 루트 노드는 Behavior만 가능
+            if (newRootNode == null || !(newRootNode is BehaviorNode behaviorNode) || !behaviorNode.IsValid)
             {
-                Debug.LogWarning("루트 노드는 Motion만 설정할 수 있습니다.");
+                Debug.LogWarning("루트 노드는 Behavior만 설정할 수 있습니다.");
                 return;
             }
             
@@ -573,8 +573,8 @@ namespace ActionDesigner.Editor
             
             BaseNode node = _action.CreateNode(nodeType.Name, nodeType.Namespace, baseType, worldMousePosition);
             
-            // 루트 노드는 Motion만 가능
-            if (_action.rootID == 0 && baseType == "Motion")
+            // 루트 노드는 Behavior만 가능
+            if (_action.rootID == 0 && baseType == "Behavior")
                 _action.rootID = node.id;
 
             CreateNodeView(node);

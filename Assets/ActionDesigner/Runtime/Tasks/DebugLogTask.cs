@@ -3,7 +3,7 @@ using UnityEngine;
 namespace ActionDesigner.Runtime
 {
     [System.Serializable]
-    public sealed class DebugLogTask : IMotion
+    public sealed class DebugLogTask : IBehavior
     {
         [SerializeField] string message = "Hello World!";
 

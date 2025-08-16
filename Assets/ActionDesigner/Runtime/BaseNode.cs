@@ -28,7 +28,7 @@ namespace ActionDesigner.Runtime
         public abstract string GetDisplayName();
 
         /// <summary>
-        /// 노드 타입 반환 ("Motion" 또는 "Condition")
+        /// 노드 타입 반환 ("Behavior" 또는 "Condition")
         /// </summary>
         public abstract string GetNodeType();
 
@@ -41,7 +41,7 @@ namespace ActionDesigner.Runtime
         }
 
         /// <summary>
-        /// 노드에 할당된 객체 반환 (Motion 또는 Condition)
+        /// 노드에 할당된 객체 반환 (Behavior 또는 Condition)
         /// </summary>
         public abstract object GetNodeObject();
 

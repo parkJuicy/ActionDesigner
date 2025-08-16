@@ -53,7 +53,7 @@
     background-color: rgb(48, 48, 48);
 }
 
-.motion #input {
+.behavior #input {
     background-color: rgb(254, 95, 85);
 }
 

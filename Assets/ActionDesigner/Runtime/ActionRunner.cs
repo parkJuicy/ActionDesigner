@@ -16,7 +16,7 @@ namespace ActionDesigner.Runtime
         [SerializeField] bool autoStart = true;
 
         BaseNode currentNode;
-        bool isMotionCompleted;
+        bool isBehaviorCompleted;
 
         public Action Action => action;
         public ActionRunnerState currentState { get; private set; }
@@ -38,7 +38,7 @@ namespace ActionDesigner.Runtime
                 return;
             }
 
-            if (!(rootNode is MotionNode motionNode) || !motionNode.IsValid)
+            if (!(rootNode is BehaviorNode behaviorNode) || !behaviorNode.IsValid)
             {
                 return;
             }
@@ -46,22 +46,22 @@ namespace ActionDesigner.Runtime
             currentState = ActionRunnerState.Running;
             currentNode = rootNode;
             currentNodeID = currentNode.id;
-            isMotionCompleted = false;
+            isBehaviorCompleted = false;
 
             StartCurrentNode();
         }
 
         public void StopAction()
         {
-            if (currentNode is MotionNode motionNode)
+            if (currentNode is BehaviorNode behaviorNode)
             {
-                motionNode.motion?.Stop();
-                EndAllConditionsForMotion(motionNode);
+                behaviorNode.behavior?.Stop();
+                EndAllConditionsForBehavior(behaviorNode);
             }
 
             currentNode = null;
             currentNodeID = 0;
-            isMotionCompleted = false;
+            isBehaviorCompleted = false;
             currentState = ActionRunnerState.Idle;
         }
 
@@ -79,45 +79,45 @@ namespace ActionDesigner.Runtime
                 return;
 
             float deltaTime = Time.deltaTime;
-            if (currentNode is MotionNode motionNode)
+            if (currentNode is BehaviorNode behaviorNode)
             {
-                UpdateMotionWithTransitions(motionNode, deltaTime);
+                UpdateBehaviorWithTransitions(behaviorNode, deltaTime);
             }
         }
 
-        void UpdateMotionWithTransitions(MotionNode motionNode, float deltaTime)
+        void UpdateBehaviorWithTransitions(BehaviorNode behaviorNode, float deltaTime)
         {
-            if (motionNode?.motion == null) return;
-            isMotionCompleted = motionNode.motion.Update(deltaTime);
-            BaseNode nextNode = EvaluateTransitions(motionNode, deltaTime);
+            if (behaviorNode?.behavior == null) return;
+            isBehaviorCompleted = behaviorNode.behavior.Update(deltaTime);
+            BaseNode nextNode = EvaluateTransitions(behaviorNode, deltaTime);
 
-            if (nextNode == null || isMotionCompleted && motionNode.childrenID.Count == 0)
+            if (nextNode == null || isBehaviorCompleted && behaviorNode.childrenID.Count == 0)
             {
-                CompleteAction(motionNode);
+                CompleteAction(behaviorNode);
                 return;
             }
 
             if (nextNode != currentNode)
             {
-                if (isMotionCompleted)
-                    motionNode.motion.End();
+                if (isBehaviorCompleted)
+                    behaviorNode.behavior.End();
                 else
-                    motionNode.motion.Stop();
-                EndAllConditionsForMotion(motionNode);
+                    behaviorNode.behavior.Stop();
+                EndAllConditionsForBehavior(behaviorNode);
                 TransitionToNode(nextNode);
             }
         }
 
-        BaseNode EvaluateTransitions(MotionNode motionNode, float deltaTime)
+        BaseNode EvaluateTransitions(BehaviorNode behaviorNode, float deltaTime)
         {
-            if (motionNode.childrenID.Count == 0) return null;
+            if (behaviorNode.childrenID.Count == 0) return null;
 
-            foreach (var childID in motionNode.childrenID)
+            foreach (var childID in behaviorNode.childrenID)
             {
                 var conditionNode = action.FindNode(childID) as ConditionNode;
                 if (conditionNode?.condition == null) continue;
 
-                bool conditionSuccess = isMotionCompleted;
+                bool conditionSuccess = isBehaviorCompleted;
                 if (conditionNode.condition is not EndCondition)
                 {
                     conditionSuccess = conditionNode.condition.Evaluate(deltaTime);
@@ -129,19 +129,19 @@ namespace ActionDesigner.Runtime
                     if (conditionNode.childrenID.Count == 0)
                         return null;
 
-                    return GetNextMotionFromCondition(conditionNode);
+                    return GetNextBehaviorFromCondition(conditionNode);
                 }
             }
-            return motionNode;
+            return behaviorNode;
         }
 
-        BaseNode GetNextMotionFromCondition(ConditionNode conditionNode)
+        BaseNode GetNextBehaviorFromCondition(ConditionNode conditionNode)
         {
             if (conditionNode.childrenID.Count > 0)
             {
                 var nextNodeID = conditionNode.childrenID[0];
                 var nextNode = action.FindNode(nextNodeID);
-                if (nextNode is MotionNode motionNode && motionNode.IsValid)
+                if (nextNode is BehaviorNode behaviorNode && behaviorNode.IsValid)
                 {
                     return nextNode;
                 }
@@ -153,13 +153,13 @@ namespace ActionDesigner.Runtime
         {
             currentNode = nextNode;
             currentNodeID = currentNode.id;
-            isMotionCompleted = false;
+            isBehaviorCompleted = false;
             StartCurrentNode();
         }
 
-        void EndAllConditionsForMotion(MotionNode motionNode)
+        void EndAllConditionsForBehavior(BehaviorNode behaviorNode)
         {
-            foreach (var childID in motionNode.childrenID)
+            foreach (var childID in behaviorNode.childrenID)
             {
                 var conditionNode = action.FindNode(childID) as ConditionNode;
                 if (conditionNode?.condition != null)
@@ -169,9 +169,9 @@ namespace ActionDesigner.Runtime
             }
         }
 
-        void StartAllConditionsForMotion(MotionNode motionNode)
+        void StartAllConditionsForBehavior(BehaviorNode behaviorNode)
         {
-            foreach (var childID in motionNode.childrenID)
+            foreach (var childID in behaviorNode.childrenID)
             {
                 var conditionNode = action.FindNode(childID) as ConditionNode;
                 if (conditionNode?.condition != null)
@@ -185,11 +185,11 @@ namespace ActionDesigner.Runtime
         {
             if (currentNode == null) return;
 
-            if (currentNode is MotionNode motionNode)
+            if (currentNode is BehaviorNode behaviorNode)
             {
-                motionNode.motion?.Start();
-                isMotionCompleted = false;
-                StartAllConditionsForMotion(motionNode);
+                behaviorNode.behavior?.Start();
+                isBehaviorCompleted = false;
+                StartAllConditionsForBehavior(behaviorNode);
             }
         }
 
@@ -201,13 +201,13 @@ namespace ActionDesigner.Runtime
             }
         }
 
-        void CompleteAction(MotionNode motionNode)
+        void CompleteAction(BehaviorNode behaviorNode)
         {
-            motionNode.motion.End();
-            EndAllConditionsForMotion(motionNode);
+            behaviorNode.behavior.End();
+            EndAllConditionsForBehavior(behaviorNode);
             currentNode = null;
             currentNodeID = 0;
-            isMotionCompleted = false;
+            isBehaviorCompleted = false;
             currentState = ActionRunnerState.Idle;
         }
     }

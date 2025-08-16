@@ -41,9 +41,9 @@ namespace ActionDesigner.Runtime
         {
             BaseNode node;
             
-            if (baseType == "Motion")
+            if (baseType == "Behavior")
             {
-                node = new MotionNode();
+                node = new BehaviorNode();
             }
             else if (baseType == "Condition")
             {

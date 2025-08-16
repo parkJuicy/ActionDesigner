@@ -7,10 +7,10 @@ using UnityEngine.UIElements;
 namespace ActionDesigner.Editor
 {
     /// <summary>
-    /// Motion 타입을 위한 PropertyDrawer
+    /// Behavior 타입을 위한 PropertyDrawer
     /// </summary>
-    [CustomPropertyDrawer(typeof(IMotion), true)]
-    public class MotionPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(IBehavior), true)]
+    public class BehaviorPropertyDrawer : PropertyDrawer
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
