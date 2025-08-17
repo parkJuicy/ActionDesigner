@@ -36,6 +36,10 @@ namespace ActionDesigner.Editor
 
     public class ActionDesignerEditor : EditorWindow
     {
+        // 마지막 사용된 Action을 저장 (문제 2 해결)
+        private static Runtime.Action _lastUsedAction;
+        private static GameObject _lastActionGameObject;
+        
         ActionRunner _actionRunner;
         ActionView _actionView;
         UIToolkitNodeInspector _nodeInspector;
@@ -80,6 +84,11 @@ namespace ActionDesigner.Editor
 
             // 런타임 상태 업데이트 등록
             EditorApplication.update += UpdateRuntimeState;
+            
+            // 초기 선택 처리 (문제 1 해결)
+            EditorApplication.delayCall += () => {
+                OnSelectionChange();
+            };
         }
 
         void OnEnable()
@@ -129,7 +138,7 @@ namespace ActionDesigner.Editor
                 
                 if (_actionRunner == null)
                 {
-                    _actionRunner = FindObjectOfType<ActionRunner>();
+                    _actionRunner = UnityEngine.Object.FindObjectOfType<ActionRunner>();
                 }
                 
                 if (_actionRunner == null)
@@ -149,22 +158,32 @@ namespace ActionDesigner.Editor
         {
             if (_nodeInspector != null)
             {
-                _nodeInspector.UpdateSelection(nodeView);
+                // 문제 2, 3 해결: 마지막 Action GameObject 사용
+                var targetGameObject = Selection.activeGameObject;
+                if (targetGameObject == null || !HasActionComponent(targetGameObject))
+                {
+                    targetGameObject = _lastActionGameObject;
+                }
+                
+                _nodeInspector.UpdateSelection(nodeView, targetGameObject);
             }
         }
 
         void OnSelectionChange()
         {
             var gameObject = Selection.activeGameObject;
-            if (gameObject)
+            if (gameObject && HasActionComponent(gameObject))
             {
-                ActionRunner actionRunner = gameObject.GetComponent<ActionRunner>();
-                if (actionRunner)
+                var action = GetActionFromGameObject(gameObject);
+                if (action != null)
                 {
-                    _actionRunner = actionRunner;
+                    _lastUsedAction = action;
+                    _lastActionGameObject = gameObject;
+                    
+                    _actionRunner = gameObject.GetComponent<ActionRunner>();
                     if (_actionView != null)
                     {
-                        _actionView.PopulateView(actionRunner.Action);
+                        _actionView.PopulateView(action);
                         if (_actionNameLabel != null)
                         {
                             _actionNameLabel.text = $"{gameObject.name} - Action Designer";
@@ -172,6 +191,73 @@ namespace ActionDesigner.Editor
                     }
                 }
             }
+        }
+        
+        /// <summary>
+        /// GameObject가 Action을 포함한 컴포넌트를 가지고 있는지 확인
+        /// </summary>
+        private bool HasActionComponent(GameObject gameObject)
+        {
+            if (gameObject == null) return false;
+            
+            // ActionRunner 확인
+            if (gameObject.GetComponent<ActionRunner>() != null)
+                return true;
+                
+            // 다른 Action을 가진 컴포넌트들 확인 (확장 가능)
+            var allComponents = gameObject.GetComponents<MonoBehaviour>();
+            foreach (var component in allComponents)
+            {
+                if (component == null) continue;
+                
+                var fields = component.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                foreach (var field in fields)
+                {
+                    if (field.FieldType == typeof(Runtime.Action))
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// GameObject에서 Action을 가져오기
+        /// </summary>
+        private Runtime.Action GetActionFromGameObject(GameObject gameObject)
+        {
+            if (gameObject == null) return null;
+            
+            // ActionRunner에서 Action 가져오기
+            var actionRunner = gameObject.GetComponent<ActionRunner>();
+            if (actionRunner != null)
+            {
+                return actionRunner.Action;
+            }
+            
+            // 다른 컴포넌트에서 Action 찾기
+            var allComponents = gameObject.GetComponents<MonoBehaviour>();
+            foreach (var component in allComponents)
+            {
+                if (component == null) continue;
+                
+                var fields = component.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                foreach (var field in fields)
+                {
+                    if (field.FieldType == typeof(Runtime.Action))
+                    {
+                        var action = field.GetValue(component) as Runtime.Action;
+                        if (action != null)
+                        {
+                            return action;
+                        }
+                    }
+                }
+            }
+            
+            return null;
         }
     }
 }
