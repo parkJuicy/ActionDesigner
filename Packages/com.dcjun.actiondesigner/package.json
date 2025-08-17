@@ -1,0 +1,26 @@
+{
+  "name": "com.dcjun.actiondesigner",
+  "version": "1.0.0",
+  "displayName": "Action Designer",
+  "description": "Unity용 비헤이비어 트리 시스템 - 노드 기반 액션 디자이너",
+  "unity": "2021.3",
+  "keywords": [
+    "behavior tree",
+    "ai",
+    "action designer",
+    "node editor",
+    "visual scripting"
+  ],
+  "author": {
+    "name": "dcjun",
+    "email": "dcjun@company.com"
+  },
+  "dependencies": {},
+  "samples": [
+    {
+      "displayName": "Action Designer Samples",
+      "description": "Basic usage examples of Action Designer",
+      "path": "Samples~"
+    }
+  ]
+}

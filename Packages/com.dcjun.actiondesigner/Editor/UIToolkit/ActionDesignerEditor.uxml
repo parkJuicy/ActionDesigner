@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ActionDesigner.Editor.SplitView fixed-pane-initial-dimension="220">
+        <ui:VisualElement name="left-panel">
+            <ui:Label text="Inspector" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />
+            <!-- UIToolkitNodeInspector가 코드에서 동적으로 추가됨 -->
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel">
+            <ui:Label text="Action View" display-tooltip-when-elided="true" style="background-color: rgb(47, 47, 47); font-size: 13px;" />
+            <ActionDesigner.Editor.ActionView focusable="true" name="ActionView" style="flex-grow: 1;">
+                <ui:Label display-tooltip-when-elided="true" name="actionName" style="font-size: 20px; -unity-font-style: bold; color: rgba(255, 225, 0, 0.53);" />
+            </ActionDesigner.Editor.ActionView>
+        </ui:VisualElement>
+    </ActionDesigner.Editor.SplitView>
+</ui:UXML>

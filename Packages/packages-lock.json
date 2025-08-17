@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.dcjun.actiondesigner": {
+      "version": "file:com.dcjun.actiondesigner",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "10.2.1",
       "depth": 0,

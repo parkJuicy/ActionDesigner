@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.dcjun.actiondesigner": "file:../Packages/com.dcjun.actiondesigner",
     "com.unity.2d.animation": "10.2.1",
     "com.unity.2d.aseprite": "1.1.9",
     "com.unity.2d.pixel-perfect": "5.0.3",
