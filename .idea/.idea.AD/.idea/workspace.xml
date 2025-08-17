@@ -5,20 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="42cdf4f3-a35f-4073-b08a-92646750210e" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/ActionView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeSearchWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeSearchWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Editor/NodeView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Action.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/ActionRunner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/BaseNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/BaseNode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/IMotion.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/IMotion.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/MotionNode.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/MotionNode.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/DebugLogTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/Parallel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/Parallel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/Sequencer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/Sequencer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActionDesigner/Runtime/Tasks/WaitTask.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/com.dcjun.actiondesigner/Runtime/Tasks/WaitTask.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/com.dcjun.actiondesigner/Runtime/Tasks/WaitTask.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/com.dcjun.actiondesigner/Samples~/BasicUsage/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/com.dcjun.actiondesigner/Samples~/BasicUsage/SampleNodes.cs" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
