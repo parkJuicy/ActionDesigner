@@ -94,11 +94,13 @@ namespace ActionDesigner.Editor
         void OnEnable()
         {
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
         }
 
         void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
             EditorApplication.update -= UpdateRuntimeState;
         }
 
@@ -124,6 +126,37 @@ namespace ActionDesigner.Editor
         {
             _wasInPlayMode = false;
             _actionView?.UpdateRuntimeStates(null, 0);
+        }
+        
+        /// <summary>
+        /// Hierarchy 변경 감지 - ActionRunner 컴포넌트 추가/제거 시 자동 업데이트
+        /// </summary>
+        void OnHierarchyChanged()
+        {
+            // 지연 호출을 통해 선택된 GameObject의 컴포넌트 변경사항 감지
+            EditorApplication.delayCall += () => {
+                // 현재 선택된 GameObject가 있고 ActionRunner를 가지고 있다면 자동 로드
+                var selectedGameObject = Selection.activeGameObject;
+                if (selectedGameObject != null && HasActionComponent(selectedGameObject))
+                {
+                    var action = GetActionFromGameObject(selectedGameObject);
+                    if (action != null && action != _lastUsedAction)
+                    {
+                        _lastUsedAction = action;
+                        _lastActionGameObject = selectedGameObject;
+                        
+                        _actionRunner = selectedGameObject.GetComponent<ActionRunner>();
+                        if (_actionView != null)
+                        {
+                            _actionView.PopulateView(action);
+                            if (_actionNameLabel != null)
+                            {
+                                _actionNameLabel.text = $"{selectedGameObject.name} - Action Designer";
+                            }
+                        }
+                    }
+                }
+            };
         }
 
         void UpdateRuntimeState()
