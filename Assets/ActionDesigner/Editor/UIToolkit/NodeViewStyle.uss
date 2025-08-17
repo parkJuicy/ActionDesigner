@@ -141,13 +141,17 @@
     margin: 0;
     padding: 0;
     position: relative;
-}
-
-.node:hover {
     border-left-width: 2px;
     border-right-width: 2px;
     border-top-width: 2px;
     border-bottom-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.node:hover {
     border-left-color: rgba(0, 221, 255, 255);
     border-right-color: rgba(0, 221, 255, 255);
     border-top-color: rgba(0, 221, 255, 255);
@@ -166,12 +170,6 @@
 }
 
 .runtime-active #node-border {
-    border-left-color: rgb(255, 140, 140);
-    border-right-color: rgb(255, 140, 140);
-    border-top-color: rgb(255, 140, 140);
-    border-bottom-color: rgb(255, 140, 140);
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-top-width: 5px;
-    border-bottom-width: 5px;
+    border-color: rgb(255, 140, 140);
+    box-shadow: 0 0 0 3px rgb(255, 140, 140);
 }

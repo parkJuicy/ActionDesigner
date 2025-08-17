@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ActionDesigner.Runtime;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -154,19 +155,40 @@ namespace ActionDesigner.Editor
         {
             if (Application.isPlaying) return;
 
-            // 좌표를 정수로 따림 (픽셀 완벽 정렬)
-            var roundedPos = new Rect(
-                Mathf.Round(newPos.x),
-                Mathf.Round(newPos.y),
-                newPos.width,
-                newPos.height
-            );
-            
-            base.SetPosition(roundedPos);
-            
-            // BaseNode에도 정확한 좌표 저장
-            _node.position = new Vector2(roundedPos.x, roundedPos.y);
+            var actionView = GetFirstAncestorOfType<ActionView>();
+            var finalPos = newPos;
+
+            if (actionView != null)
+            {
+                float snapDistance = 15f; // 스냅 감도
+                var otherNodeViews = actionView.nodes.Cast<NodeView>().Where(n => n != this && n.style.position == Position.Absolute);
+
+                foreach (var otherNodeView in otherNodeViews)
+                {
+                    var otherPos = otherNodeView.GetPosition();
+
+                    // X축 스냅
+                    if (Mathf.Abs(otherPos.x - finalPos.x) < snapDistance)
+                    {
+                        finalPos.x = otherPos.x;
+                    }
+
+                    // Y축 스냅
+                    if (Mathf.Abs(otherPos.y - finalPos.y) < snapDistance)
+                    {
+                        finalPos.y = otherPos.y;
+                    }
+                }
+            }
+
+            // 최종 위치를 정수로 반올림하여 픽셀 정렬
+            finalPos.x = Mathf.Round(finalPos.x);
+            finalPos.y = Mathf.Round(finalPos.y);
+
+            base.SetPosition(finalPos);
+            _node.position = new Vector2(finalPos.x, finalPos.y);
         }
+
 
         public override void OnSelected()
         {
