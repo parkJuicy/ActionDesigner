@@ -154,11 +154,9 @@ namespace ActionDesigner.Runtime
                 return null;
             }
             
-            node.type = type;
-            node.nameSpace = namespaceType;
             node.id = GUID.Generate().GetHashCode();
             node.position = position;
-            node.CreateNodeObject();
+            node.CreateNodeObject(type, namespaceType);
             
             nodes.Add(node);
             return node;

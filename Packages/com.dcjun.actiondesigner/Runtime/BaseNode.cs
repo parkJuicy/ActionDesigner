@@ -11,10 +11,6 @@ namespace ActionDesigner.Runtime
     public abstract class BaseNode
     {
         [HideInInspector]
-        public string type;
-        [HideInInspector]
-        public string nameSpace;
-        [HideInInspector]
         public int id;
         [HideInInspector]
         public Vector2 position;
@@ -48,6 +44,6 @@ namespace ActionDesigner.Runtime
         /// <summary>
         /// type과 namespace로부터 실제 객체 생성
         /// </summary>
-        public abstract void CreateNodeObject();
+        public abstract void CreateNodeObject(string type, string namespaceType);
     }
 }

@@ -20,6 +20,9 @@ namespace ActionDesigner.Editor
         // 런타임 하이라이팅을 위한 변수들
         private int _lastExecutingNodeID = 0;
         private bool _isRuntimeUpdateActive = false;
+        
+        // 복사/붙여넣기를 위한 변수들
+        private List<BaseNode> _copiedNodes = new List<BaseNode>();
 
         public Action<NodeView> OnNodeSelectionChanged { get; internal set; }
 
@@ -37,6 +40,9 @@ namespace ActionDesigner.Editor
             
             // 마우스 위치 추적
             RegisterCallback<MouseMoveEvent>(OnMouseMove);
+            
+            // 키보드 이벤트 등록
+            RegisterCallback<KeyDownEvent>(OnKeyDown);
             
             // 키보드 이벤트 포커스 가능하도록 설정
             focusable = true;
@@ -686,6 +692,298 @@ namespace ActionDesigner.Editor
                     nodeView.SetRuntimeHighlight(false);
                 }
             }
+        }
+        
+        /// <summary>
+        /// 키보드 이벤트 처리 (Ctrl+C, Ctrl+V)
+        /// </summary>
+        private void OnKeyDown(KeyDownEvent evt)
+        {
+            if (Application.isPlaying) return;
+            
+            // Ctrl+C (복사)
+            if (evt.keyCode == KeyCode.C && evt.ctrlKey)
+            {
+                CopySelectedNodes();
+                evt.StopPropagation();
+                evt.PreventDefault();
+            }
+            // Ctrl+V (붙여넣기)
+            else if (evt.keyCode == KeyCode.V && evt.ctrlKey)
+            {
+                PasteNodes();
+                evt.StopPropagation();
+                evt.PreventDefault();
+            }
+        }
+        
+        /// <summary>
+        /// 선택된 노드들을 복사
+        /// </summary>
+        private void CopySelectedNodes()
+        {
+            if (_action == null) return;
+            
+            var selectedNodes = new List<BaseNode>();
+            
+            // 선택된 NodeView들에서 BaseNode 추출
+            foreach (var element in selection)
+            {
+                if (element is NodeView nodeView)
+                {
+                    selectedNodes.Add(nodeView.Node);
+                }
+            }
+            
+            if (selectedNodes.Count == 0) return;
+            
+            _copiedNodes.Clear();
+            
+            // 선택된 노드들을 복사 (딥 카피)
+            foreach (var node in selectedNodes)
+            {
+                var copiedNode = CloneNode(node);
+                if (copiedNode != null)
+                {
+                    _copiedNodes.Add(copiedNode);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 복사된 노드들을 붙여넣기
+        /// </summary>
+        private void PasteNodes()
+        {
+            if (_action == null || _copiedNodes.Count == 0) return;
+            
+            // 기존 선택 해제
+            ClearSelection();
+            
+            var newNodes = new List<BaseNode>();
+            var oldToNewIdMap = new Dictionary<int, int>();
+            
+            // 노드들을 새로운 ID로 생성
+            foreach (var copiedNode in _copiedNodes)
+            {
+                var newNode = CloneNode(copiedNode);
+                if (newNode != null)
+                {
+                    // 새로운 ID 생성
+                    var oldId = newNode.id;
+                    newNode.id = System.Guid.NewGuid().GetHashCode();
+                    oldToNewIdMap[oldId] = newNode.id;
+                    
+                    // 위치를 약간 오프셋 (오른쪽 아래로 30픽셀)
+                    newNode.position += new Vector2(30f, 30f);
+                    
+                    // 자식 연결 정보는 일단 클리어 (나중에 복원)
+                    newNode.childrenID.Clear();
+                    
+                    _action.nodes.Add(newNode);
+                    newNodes.Add(newNode);
+                }
+            }
+            
+            // 자식 연결 관계 복원 (복사된 노드들 간의 연결만)
+            for (int i = 0; i < _copiedNodes.Count; i++)
+            {
+                var originalNode = _copiedNodes[i];
+                var newNode = newNodes[i];
+                
+                foreach (var childId in originalNode.childrenID)
+                {
+                    if (oldToNewIdMap.ContainsKey(childId))
+                    {
+                        newNode.childrenID.Add(oldToNewIdMap[childId]);
+                    }
+                }
+            }
+            
+            // UI에 새 노드들 추가
+            foreach (var newNode in newNodes)
+            {
+                var nodeView = CreateNodeViewForPaste(newNode);
+                AddToSelection(nodeView); // 새로 생성된 노드들 선택
+            }
+            
+            // Edge 다시 그리기 (새로운 연결들 표시)
+            DrawEdge();
+            
+            EditorUtility.SetDirty(_actionRunner);
+        }
+        
+        /// <summary>
+        /// 노드를 복제 (딥 카피)
+        /// </summary>
+        private BaseNode CloneNode(BaseNode original)
+        {
+            if (original == null) return null;
+            
+            try
+            {
+                BaseNode clonedNode;
+                
+                // 노드 타입에 따라 새 인스턴스 생성
+                if (original is BehaviorNode originalBehavior)
+                {
+                    var newBehavior = new BehaviorNode();
+                    newBehavior.id = originalBehavior.id;
+                    newBehavior.position = originalBehavior.position;
+                    newBehavior.title = originalBehavior.title;
+                    newBehavior.childrenID = new List<int>(originalBehavior.childrenID);
+                    
+                    // SerializeReference 객체를 수동으로 복제
+                    if (originalBehavior.behavior != null)
+                    {
+                        newBehavior.behavior = DeepCloneBehavior(originalBehavior.behavior);
+                    }
+                    
+                    clonedNode = newBehavior;
+                }
+                else if (original is ConditionNode originalCondition)
+                {
+                    var newCondition = new ConditionNode();
+                    newCondition.id = originalCondition.id;
+                    newCondition.position = originalCondition.position;
+                    newCondition.title = originalCondition.title;
+                    newCondition.childrenID = new List<int>(originalCondition.childrenID);
+                    
+                    // SerializeReference 객체를 수동으로 복제
+                    if (originalCondition.condition != null)
+                    {
+                        newCondition.condition = DeepCloneCondition(originalCondition.condition);
+                    }
+                    
+                    clonedNode = newCondition;
+                }
+                else
+                {
+                    Debug.LogError($"알 수 없는 노드 타입: {original.GetType()}");
+                    return null;
+                }
+                
+                return clonedNode;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"노드 복제 실패: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// IBehavior 객체를 깊은 복사
+        /// </summary>
+        private IBehavior DeepCloneBehavior(IBehavior original)
+        {
+            if (original == null) return null;
+            
+            try
+            {
+                // 리플렉션을 사용해서 새 인스턴스 생성
+                var originalType = original.GetType();
+                var cloned = (IBehavior)Activator.CreateInstance(originalType);
+                
+                // 모든 필드를 복사
+                var fields = originalType.GetFields(System.Reflection.BindingFlags.Instance | 
+                                                   System.Reflection.BindingFlags.Public | 
+                                                   System.Reflection.BindingFlags.NonPublic);
+                
+                foreach (var field in fields)
+                {
+                    var value = field.GetValue(original);
+                    
+                    // SerializeReference 배열인 경우 (예: Sequencer의 behaviors)
+                    if (field.FieldType.IsArray && field.FieldType.GetElementType().IsInterface)
+                    {
+                        if (value is Array originalArray)
+                        {
+                            var elementType = field.FieldType.GetElementType();
+                            var clonedArray = Array.CreateInstance(elementType, originalArray.Length);
+                            
+                            for (int i = 0; i < originalArray.Length; i++)
+                            {
+                                var element = originalArray.GetValue(i);
+                                if (element is IBehavior behaviorElement)
+                                {
+                                    clonedArray.SetValue(DeepCloneBehavior(behaviorElement), i);
+                                }
+                                else if (element is ICondition conditionElement)
+                                {
+                                    clonedArray.SetValue(DeepCloneCondition(conditionElement), i);
+                                }
+                                else if (element != null)
+                                {
+                                    // 다른 타입의 경우 기본 복사
+                                    clonedArray.SetValue(element, i);
+                                }
+                            }
+                            field.SetValue(cloned, clonedArray);
+                        }
+                    }
+                    else
+                    {
+                        // 일반 필드는 그대로 복사
+                        field.SetValue(cloned, value);
+                    }
+                }
+                
+                return cloned;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Behavior 복제 실패: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// ICondition 객체를 깊은 복사
+        /// </summary>
+        private ICondition DeepCloneCondition(ICondition original)
+        {
+            if (original == null) return null;
+            
+            try
+            {
+                // 리플렉션을 사용해서 새 인스턴스 생성
+                var originalType = original.GetType();
+                var cloned = (ICondition)Activator.CreateInstance(originalType);
+                
+                // 모든 필드를 복사
+                var fields = originalType.GetFields(System.Reflection.BindingFlags.Instance | 
+                                                   System.Reflection.BindingFlags.Public | 
+                                                   System.Reflection.BindingFlags.NonPublic);
+                
+                foreach (var field in fields)
+                {
+                    var value = field.GetValue(original);
+                    field.SetValue(cloned, value);
+                }
+                
+                return cloned;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Condition 복제 실패: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// NodeView를 생성하고 반환 (붙여넣기용)
+        /// </summary>
+        private NodeView CreateNodeViewForPaste(BaseNode node)
+        {
+            NodeView nodeView = new NodeView(node, node.id == _action.rootID)
+            {
+                OnNodeSelected = OnNodeSelectionChanged,
+                OnNodeRootSet = OnNodeRootSet,
+                OnNodeTypeChanged = OnNodeTypeChanged
+            };
+            AddElement(nodeView);
+            return nodeView;
         }
     }
 }

@@ -26,14 +26,6 @@ namespace ActionDesigner.Runtime
                 return behavior.GetType().Name;
 #endif
             }
-            else if (!string.IsNullOrEmpty(type))
-            {
-#if UNITY_EDITOR
-                return UnityEditor.ObjectNames.NicifyVariableName(type);
-#else
-                return type;
-#endif
-            }
             return "Empty Behavior";
         }
 
@@ -52,11 +44,11 @@ namespace ActionDesigner.Runtime
             return behavior;
         }
 
-        public override void CreateNodeObject()
+        public override void CreateNodeObject(string type, string namespaceType)
         {
             if (string.IsNullOrEmpty(type)) return;
 
-            var operationType = Action.GetOperationType(nameSpace, type);
+            var operationType = Action.GetOperationType(namespaceType, type);
             if (operationType != null && typeof(IBehavior).IsAssignableFrom(operationType))
             {
                 behavior = Activator.CreateInstance(operationType) as IBehavior;

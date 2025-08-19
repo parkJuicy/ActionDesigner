@@ -26,14 +26,6 @@ namespace ActionDesigner.Runtime
                 return condition.GetType().Name;
 #endif
             }
-            else if (!string.IsNullOrEmpty(type))
-            {
-#if UNITY_EDITOR
-                return UnityEditor.ObjectNames.NicifyVariableName(type);
-#else
-                return type;
-#endif
-            }
             return "Empty Condition";
         }
 
@@ -53,11 +45,11 @@ namespace ActionDesigner.Runtime
             return condition;
         }
 
-        public override void CreateNodeObject()
+        public override void CreateNodeObject(string type, string namespaceType)
         {
             if (string.IsNullOrEmpty(type)) return;
 
-            var operationType = Action.GetOperationType(nameSpace, type);
+            var operationType = Action.GetOperationType(namespaceType, type);
             if (operationType != null && typeof(ICondition).IsAssignableFrom(operationType))
             {
                 condition = Activator.CreateInstance(operationType) as ICondition;
